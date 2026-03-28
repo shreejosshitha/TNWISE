@@ -1,6 +1,8 @@
 import { Header } from "../components/Header";
 import { AIChatbot } from "../components/AIChatbot";
 import { Link } from "react-router";
+import { useMemo } from "react";
+import { useAuth } from "../context/AuthContext";
 import {
   Zap,
   Droplet,
@@ -16,6 +18,23 @@ import {
 } from "lucide-react";
 
 export function UserDashboard() {
+  const { user } = useAuth();
+
+  const profile = user?.citizenProfile;
+  const address = profile
+    ? `${profile.address}, ${profile.city}, ${profile.state} - ${profile.pincode}`
+    : "Complete your profile to view full address.";
+
+  const activeServices = useMemo(() => {
+    if (!profile?.services) return 0;
+    return Object.values(profile.services).filter((service) => service?.status === "active").length;
+  }, [profile?.services]);
+
+  const totalServices = useMemo(() => {
+    if (!profile?.services) return 0;
+    return Object.values(profile.services).filter(Boolean).length;
+  }, [profile?.services]);
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <Header showAuth={true} />
@@ -23,17 +42,27 @@ export function UserDashboard() {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         {/* Welcome Section */}
         <div className="bg-gradient-to-r from-blue-600 to-green-600 rounded-2xl p-8 text-white mb-8">
-          <div className="flex items-center justify-between">
+          <div className="grid gap-6 lg:grid-cols-[1.6fr_1fr] items-center">
             <div>
-              <h1 className="text-3xl font-bold mb-2">Welcome back, Rajesh! 👋</h1>
-              <p className="text-blue-100">
-                Manage all your public services from one place
-              </p>
+              <h1 className="text-3xl font-bold mb-2">
+                Welcome back, {user?.name ?? "Citizen"}! 👋
+              </h1>
+              <p className="text-blue-100">Manage all your public services from one place</p>
+              <div className="mt-4 rounded-3xl bg-white/10 border border-white/20 p-4 max-w-xl">
+                <p className="text-sm text-blue-100">Logged in as</p>
+                <p className="text-lg font-semibold">{user?.role === "admin" ? `${user.name} (Admin)` : user?.name}</p>
+                <p className="text-sm text-blue-100 mt-1">{user?.phone ? `+91 ${user.phone}` : "Phone not available"}</p>
+                <p className="text-sm text-blue-100">{user?.email || profile?.email || "Email not available"}</p>
+              </div>
             </div>
-            <div className="hidden md:block">
-              <div className="bg-white/20 backdrop-blur-sm rounded-xl p-4">
+            <div className="grid gap-4">
+              <div className="rounded-3xl bg-white/20 border border-white/20 p-6">
                 <p className="text-sm text-blue-100">Active Services</p>
-                <p className="text-3xl font-bold">3</p>
+                <p className="text-3xl font-bold">{activeServices}</p>
+              </div>
+              <div className="rounded-3xl bg-white/20 border border-white/20 p-6">
+                <p className="text-sm text-blue-100">Total Services</p>
+                <p className="text-3xl font-bold">{totalServices}</p>
               </div>
             </div>
           </div>

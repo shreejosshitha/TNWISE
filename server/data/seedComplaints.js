@@ -1,0 +1,88 @@
+import Complaint from "../models/Complaint.js";
+
+const sampleComplaints = [
+  {
+    complaintId: "WTR-CMP-001",
+    type: "Leakage",
+    category: "Water Supply",
+    subcategory: "Pipeline Leakage",
+    description: "Major leak reported along the main road near Ward 12. Water is flooding the street and disrupting traffic.",
+    location: "Ward 12, East Zone",
+    ward: "Ward 12",
+    area: "East Zone",
+    priority: "HIGH",
+    status: "NEW",
+    assignedTo: null,
+    assignedAt: null,
+    resolvedAt: null,
+    resolutionNotes: "",
+    createdAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
+    updatedAt: new Date(Date.now() - 3 * 60 * 60 * 1000),
+    coordinates: { lat: 13.0827, lng: 80.2707 },
+  },
+  {
+    complaintId: "WTR-CMP-002",
+    type: "Low Pressure",
+    category: "Water Pressure",
+    subcategory: "Low Water Pressure",
+    description: "Residents in Ward 7 are experiencing low pressure across the entire block after the morning supply cycle.",
+    location: "Ward 7, North Sector",
+    ward: "Ward 7",
+    area: "North Sector",
+    priority: "MEDIUM",
+    status: "ASSIGNED",
+    assignedTo: "Ravi Kumar",
+    assignedAt: new Date(Date.now() - 28 * 60 * 60 * 1000),
+    resolvedAt: null,
+    resolutionNotes: "",
+    createdAt: new Date(Date.now() - 30 * 60 * 60 * 1000),
+    updatedAt: new Date(Date.now() - 28 * 60 * 60 * 1000),
+    coordinates: { lat: 13.0358, lng: 80.2440 },
+  },
+  {
+    complaintId: "WTR-CMP-003",
+    type: "No Supply",
+    category: "Water Supply",
+    subcategory: "No Water Supply",
+    description: "No water is available for the last 36 hours in the municipal colony near Ward 4.",
+    location: "Ward 4, South District",
+    ward: "Ward 4",
+    area: "South District",
+    priority: "HIGH",
+    status: "IN_PROGRESS",
+    assignedTo: "Neha Sharma",
+    assignedAt: new Date(Date.now() - 26 * 60 * 60 * 1000),
+    resolvedAt: null,
+    resolutionNotes: "",
+    createdAt: new Date(Date.now() - 40 * 60 * 60 * 1000),
+    updatedAt: new Date(Date.now() - 26 * 60 * 60 * 1000),
+    coordinates: { lat: 13.0526, lng: 80.2471 },
+  },
+  {
+    complaintId: "WTR-CMP-004",
+    type: "Contamination",
+    category: "Water Quality",
+    subcategory: "Bad Taste/Odor",
+    description: "Multiple reports of discolored water in Ward 2. Samples need immediate testing.",
+    location: "Ward 2, Central Zone",
+    ward: "Ward 2",
+    area: "Central Zone",
+    priority: "LOW",
+    status: "RESOLVED",
+    assignedTo: "Suresh Patel",
+    assignedAt: new Date(Date.now() - 72 * 60 * 60 * 1000),
+    resolvedAt: new Date(Date.now() - 20 * 60 * 60 * 1000),
+    resolutionNotes: "Sample tested and filter cleaned. Supply resumed.",
+    createdAt: new Date(Date.now() - 80 * 60 * 60 * 1000),
+    updatedAt: new Date(Date.now() - 20 * 60 * 60 * 1000),
+    coordinates: { lat: 13.0458, lng: 80.2500 },
+  },
+];
+
+export async function seedComplaints() {
+  const existingCount = await Complaint.countDocuments();
+  if (existingCount === 0) {
+    await Complaint.create(sampleComplaints);
+    console.log("Seeded admin complaint data.");
+  }
+}

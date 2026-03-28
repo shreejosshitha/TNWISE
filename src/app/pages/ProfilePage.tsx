@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 import { Header } from "../components/Header";
 import { AIChatbot } from "../components/AIChatbot";
 import { Link, useNavigate } from "react-router";
@@ -7,8 +8,15 @@ import { ArrowLeft, User, Phone, Mail, MapPin, Globe, LogOut, Edit2 } from "luci
 export function ProfilePage() {
   const [language, setLanguage] = useState<"en" | "ta">("en");
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
+
+  const profile = user?.citizenProfile;
+  const address = profile
+    ? `${profile.address}, ${profile.city}, ${profile.state} - ${profile.pincode}`
+    : "No address available";
 
   const handleLogout = () => {
+    logout();
     navigate("/");
   };
 
@@ -33,8 +41,11 @@ export function ProfilePage() {
                 👤
               </div>
               <div>
-                <h2 className="text-3xl font-bold mb-2">Rajesh Kumar</h2>
-                <p className="text-blue-100">Citizen User</p>
+                <h2 className="text-3xl font-bold mb-2">{user?.name ?? "Citizen User"}</h2>
+                <p className="text-blue-100">
+                  {user?.role === "admin" ? `${user.department || "Admin"} Admin` : "Citizen User"}
+                </p>
+                {user?.phone && <p className="text-sm text-blue-100 mt-1">+91 {user.phone}</p>}
               </div>
             </div>
           </div>
@@ -57,7 +68,7 @@ export function ProfilePage() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Full Name</p>
-                    <p className="font-semibold text-gray-900">Rajesh Kumar</p>
+                    <p className="font-semibold text-gray-900">{user?.name ?? "Not provided"}</p>
                   </div>
                 </div>
 
@@ -67,7 +78,7 @@ export function ProfilePage() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Phone Number</p>
-                    <p className="font-semibold text-gray-900">+91 98765 43210</p>
+                    <p className="font-semibold text-gray-900">{user?.phone ? `+91 ${user.phone}` : "Not provided"}</p>
                   </div>
                 </div>
 
@@ -77,7 +88,7 @@ export function ProfilePage() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Email Address</p>
-                    <p className="font-semibold text-gray-900">rajesh.kumar@email.com</p>
+                    <p className="font-semibold text-gray-900">{user?.email || profile?.email || "Not provided"}</p>
                   </div>
                 </div>
 
@@ -87,9 +98,7 @@ export function ProfilePage() {
                   </div>
                   <div>
                     <p className="text-sm text-gray-600">Address</p>
-                    <p className="font-semibold text-gray-900">
-                      123, Anna Nagar, Chennai - 600040
-                    </p>
+                    <p className="font-semibold text-gray-900">{address}</p>
                   </div>
                 </div>
               </div>

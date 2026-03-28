@@ -1,6 +1,7 @@
 import { Globe, Bell, User, LogOut } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { useState } from "react";
+import { useAuth } from "../context/AuthContext";
 
 interface HeaderProps {
   showAuth?: boolean;
@@ -9,12 +10,14 @@ interface HeaderProps {
 export function Header({ showAuth = false }: HeaderProps) {
   const [language, setLanguage] = useState<"en" | "ta">("en");
   const navigate = useNavigate();
+  const { logout } = useAuth();
 
   const toggleLanguage = () => {
     setLanguage(prev => prev === "en" ? "ta" : "en");
   };
 
   const handleLogout = () => {
+    logout();
     navigate("/");
   };
 

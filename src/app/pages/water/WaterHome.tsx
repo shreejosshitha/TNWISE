@@ -1,9 +1,42 @@
+import { useEffect, useState } from "react";
 import { Header } from "../../components/Header";
 import { AIChatbot } from "../../components/AIChatbot";
 import { Link } from "react-router";
 import { CreditCard, Plus, FileText, Search, Droplet, ArrowLeft } from "lucide-react";
 
+const STORAGE_KEY = "waterRecentActions";
+
+type RecentAction = { message: string; timestamp: string };
+
+function readRecentActions(): RecentAction[] {
+  if (typeof window === "undefined") return [];
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch {
+    return [];
+  }
+}
+
+function writeRecentActions(actions: RecentAction[]): void {
+  if (typeof window === "undefined") return;
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(actions));
+}
+
 export function WaterHome() {
+  const [recentActions, setRecentActions] = useState<Array<{ message: string; timestamp: string }>>([]);
+
+  useEffect(() => {
+    setRecentActions(readRecentActions());
+  }, []);
+
+  const addRecentAction = (message: string) => {
+    const entry = { message, timestamp: new Date().toLocaleString() };
+    const updated = [entry, ...recentActions].slice(0, 5);
+    setRecentActions(updated);
+    writeRecentActions(updated);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       <Header showAuth={true} />
@@ -31,7 +64,8 @@ export function WaterHome() {
 
         <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-6">
           <Link
-            to="/water/bill-payment"
+            to="/water/bill-payment?propertyId=12345678"
+            onClick={() => addRecentAction("Requested water bill payment for property 12345678")}
             className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 group"
           >
             <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -48,6 +82,7 @@ export function WaterHome() {
 
           <Link
             to="/water/new-connection"
+            onClick={() => addRecentAction("Started new water connection request")}
             className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 group"
           >
             <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
@@ -93,6 +128,24 @@ export function WaterHome() {
               <span className="text-blue-600 font-medium text-sm">Track Now →</span>
             </div>
           </Link>
+        </div>
+
+        <div className="mt-8 bg-white rounded-2xl p-6 shadow-lg">
+          <h2 className="text-xl font-bold text-gray-900 mb-4">Recent Actions</h2>
+          {recentActions.length === 0 ? (
+            <p className="text-gray-600">No actions yet. Use an action card above to get started.</p>
+          ) : (
+            <ul className="space-y-3">
+              {recentActions.map((a, idx) => (
+                <li key={idx} className="border border-gray-200 rounded-lg p-3">
+                  <div className="flex justify-between items-start">
+                    <p className="text-gray-700">{a.message}</p>
+                    <span className="text-xs text-gray-500">{a.timestamp}</span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          )}
         </div>
       </div>
 
