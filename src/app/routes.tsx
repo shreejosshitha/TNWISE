@@ -8,6 +8,7 @@ import { NewConnection } from "./pages/electricity/NewConnection";
 import { TransparencyTracker } from "./pages/electricity/TransparencyTracker";
 import { ElectricityComplaint } from "./pages/electricity/ElectricityComplaint";
 import { ElectricityTracking } from "./pages/electricity/ElectricityTracking";
+import { EnergyCalculator } from "./pages/electricity/EnergyCalculator";
 import { WaterHome } from "./pages/water/WaterHome";
 import { WaterBillPayment } from "./pages/water/WaterBillPayment";
 import { WaterNewConnection } from "./pages/water/WaterNewConnection";
@@ -112,6 +113,10 @@ export const router = createBrowserRouter([
   {
     path: "/electricity/tracking",
     Component: ElectricityTracking,
+  },
+  {
+    path: "/electricity/calculator",
+    Component: EnergyCalculator,
   },
   {
     path: "/water",

@@ -5,8 +5,10 @@ import { Phone, Shield, User, Building, Lock, Mail, Eye, EyeOff, Loader } from "
 import { useAuth } from "../context/AuthContext";
 import { Department } from "../context/AuthContext";
 import { toast } from "sonner";
-import { sendOTP, verifyOTP, getCitizenProfile } from "../../backend/authService";
-import type { CitizenProfile } from "../../backend/database";
+// Auth API calls moved to backend routes /api/auth/*
+
+// Removed backend/database import - use any for citizenProfile
+
 
 export function LoginPage() {
   const [step, setStep] = useState<"role" | "phone" | "otp" | "admin-dept" | "admin-creds">("role");
@@ -47,17 +49,22 @@ export function LoginPage() {
 
     setIsLoading(true);
     try {
-      const response = await sendOTP(phone);
+      const response = await fetch('http://localhost:3001/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone }),
+      });
+      const data = await response.json();
       
-      if (response.success) {
-        setDemoOTP(response.data?.demoOTP || "123456");
-        toast.success(response.message);
+      if (data.success) {
+        setDemoOTP(data.data?.demoOTP || "123456");
+        toast.success(data.message);
         setStep("otp");
       } else {
-        toast.error(response.message || "Failed to send OTP");
+        toast.error(data.message || "Failed to send OTP");
       }
     } catch (error) {
-      toast.error("Network error. Please try again.");
+      toast.error("Backend not running? Start: cd src/backend && tsx server.ts");
       console.error("OTP send error:", error);
     } finally {
       setIsLoading(false);
@@ -73,10 +80,20 @@ export function LoginPage() {
 
     setIsLoading(true);
     try {
-      const response = await verifyOTP(phone, otp);
+      const response = await fetch('http://localhost:3001/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone, otp }),
+      });
+      const data = await response.json();
       
-      if (response.success) {
-        const citizenData = response.data?.user;
+      if (data.success) {
+        const { sessionToken, user: citizenData, isNewUser } = data.data || {};
+        
+        // Store session token for API calls
+        if (sessionToken) {
+          localStorage.setItem('sessionToken', sessionToken);
+        }
         
         if (citizenData) {
           // Existing citizen - login with profile
@@ -86,23 +103,22 @@ export function LoginPage() {
             name: citizenData.name,
             email: citizenData.email,
             role: "user" as const,
-            // Store additional citizen data in context
             citizenProfile: citizenData,
           };
           
           login(user);
           toast.success(`Welcome, ${citizenData.name}!`);
           navigate("/dashboard");
-        } else if (response.data?.isNewUser) {
+        } else if (isNewUser) {
           // New user - redirect to registration
           toast.success("OTP verified! Please complete your profile.");
-          navigate("/register", { state: { phone } });
+          navigate("/register", { state: { phone, sessionToken } });
         }
       } else {
-        toast.error(response.message || "OTP verification failed");
+        toast.error(data.message || "OTP verification failed");
       }
     } catch (error) {
-      toast.error("Network error. Please try again.");
+      toast.error("Network error. Backend running?");
       console.error("OTP verification error:", error);
     } finally {
       setIsLoading(false);
@@ -118,17 +134,22 @@ export function LoginPage() {
 
     setIsLoading(true);
     try {
-      const response = await sendOTP(adminPhone);
+      const response = await fetch('http://localhost:3001/api/auth/send-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: adminPhone }),
+      });
+      const data = await response.json();
       
-      if (response.success) {
-        setDemoOTP(response.data?.demoOTP || "123456");
-        toast.success(response.message);
+      if (data.success) {
+        setDemoOTP(data.data?.demoOTP || "123456");
+        toast.success(data.message);
         setStep("admin-otp");
       } else {
-        toast.error(response.message || "Failed to send OTP");
+        toast.error(data.message || "Failed to send OTP");
       }
     } catch (error) {
-      toast.error("Network error. Please try again.");
+      toast.error("Backend not running? Start: cd src/backend && tsx server.ts");
       console.error("Admin OTP error:", error);
     } finally {
       setIsLoading(false);
@@ -143,17 +164,27 @@ export function LoginPage() {
 
     setIsLoading(true);
     try {
-      const response = await verifyOTP(adminPhone, adminOtp);
+      const response = await fetch('http://localhost:3001/api/auth/verify-otp', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ phone: adminPhone, otp: adminOtp }),
+      });
+      const data = await response.json();
       
-      if (response.success) {
+      if (data.success) {
+        // OTP verified, store session token
+        const { sessionToken } = data.data || {};
+        if (sessionToken) {
+          localStorage.setItem('sessionToken', sessionToken);
+        }
         // OTP verified, move to department selection
         setStep("admin-dept");
         toast.success("OTP verified! Select your department.");
       } else {
-        toast.error(response.message || "OTP verification failed");
+        toast.error(data.message || "OTP verification failed");
       }
     } catch (error) {
-      toast.error("Network error. Please try again.");
+      toast.error("Network error. Backend running?");
       console.error("Admin OTP verification error:", error);
     } finally {
       setIsLoading(false);
@@ -182,6 +213,13 @@ export function LoginPage() {
         role: "admin" as const,
         department: selectedDept as Department,
       };
+      
+      // Get session token from OTP verification and store it
+      const token = localStorage.getItem('sessionToken');
+      if (!token) {
+        localStorage.setItem('sessionToken', `admin_${selectedDept}_${Date.now()}`);
+      }
+      
       login(adminUser);
       toast.success(`Welcome ${deptCreds.name}!`);
       navigate(`/admin/${selectedDept}`);

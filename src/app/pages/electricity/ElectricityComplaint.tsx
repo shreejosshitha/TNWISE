@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Header } from "../../components/Header";
 import { AIChatbot } from "../../components/AIChatbot";
 import { Link, useNavigate } from "react-router";
+import { useAuth } from "../../context/AuthContext";
+import { electricityApi } from "../../services/electricityApi";
 import { ArrowLeft, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
 
@@ -10,7 +12,9 @@ export function ElectricityComplaint() {
   const [description, setDescription] = useState("");
   const [consumerNumber, setConsumerNumber] = useState("");
   const [complaintId, setComplaintId] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const issueTypes = [
     "Power Outage",
@@ -22,15 +26,44 @@ export function ElectricityComplaint() {
     "Other",
   ];
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!issueType || !description || !consumerNumber) {
       toast.error("Please fill all required fields");
       return;
     }
 
-    const id = `COMP${Date.now()}`;
-    setComplaintId(id);
-    toast.success("Complaint registered successfully!");
+    if (!user?.phone) {
+      toast.error("Please login to submit complaint");
+      return;
+    }
+
+    setIsSubmitting(true);
+    try {
+      const token = localStorage.getItem("sessionToken");
+      if (!token) {
+        toast.error("Session expired, please login again");
+        return;
+      }
+
+      const response = await electricityApi.createComplaint({
+        phone: user.phone,
+        consumerNumber,
+        type: issueType,
+        description,
+      }, token);
+
+      if (response.success && response.data?.id) {
+        setComplaintId(response.data.id);
+        toast.success("Complaint registered successfully!");
+      } else {
+        toast.error(response.message || "Failed to submit complaint");
+      }
+    } catch (error) {
+      console.error("Complaint submission error:", error);
+      toast.error("Error submitting complaint. Please try again.");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   if (complaintId) {
@@ -150,9 +183,17 @@ export function ElectricityComplaint() {
 
             <button
               onClick={handleSubmit}
-              className="w-full py-4 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors"
+              disabled={isSubmitting}
+              className="w-full py-4 bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed text-white rounded-lg font-semibold transition-colors flex items-center justify-center gap-2"
             >
-              Submit Complaint
+              {isSubmitting ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Submitting...
+                </>
+              ) : (
+                "Submit Complaint"
+              )}
             </button>
           </div>
         </div>

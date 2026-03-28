@@ -1,42 +1,121 @@
+import { useEffect, useState } from "react";
 import { Header } from "../../components/Header";
 import { AIChatbot } from "../../components/AIChatbot";
 import { Link } from "react-router";
-import { ArrowLeft, FileText, AlertCircle, Clock, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, FileText, AlertCircle, Clock, CheckCircle2, Loader, Activity } from "lucide-react";
+import { useAuth } from "../../context/AuthContext";
+import { electricityApi } from "../../services/electricityApi";
+import { wsService } from "../../services/websocket";
+import { toast } from "sonner";
 
 export function ElectricityTracking() {
-  const applications = [
-    {
-      id: "EB1710752400000",
-      type: "New Connection",
-      status: "In Progress",
-      date: "2026-03-20",
-      statusColor: "blue",
-    },
-    {
-      id: "EB1710666000000",
-      type: "New Connection",
-      status: "Completed",
-      date: "2026-02-15",
-      statusColor: "green",
-    },
-  ];
+  const [applications, setApplications] = useState<any[]>([]);
+  const [complaints, setComplaints] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [wsConnected, setWsConnected] = useState(false);
+  const { user } = useAuth();
+  const token = localStorage.getItem('sessionToken');
 
-  const complaints = [
-    {
-      id: "COMP1710838800000",
-      type: "Power Outage",
-      status: "In Progress",
-      date: "2026-03-22",
-      statusColor: "yellow",
-    },
-    {
-      id: "COMP1710666000000",
-      type: "Voltage Fluctuation",
-      status: "Resolved",
-      date: "2026-03-10",
-      statusColor: "green",
-    },
-  ];
+  useEffect(() => {
+    const fetchTrackings = async () => {
+      const token = localStorage.getItem('sessionToken');
+      if (!token) return;
+      
+      setLoading(true);
+      try {
+        const response = await electricityApi.getTrackings(token);
+        if (response.success && response.data) {
+          const appList = response.data.applications || [];
+          const complaintList = response.data.complaints || [];
+          
+          setApplications(appList.map((app: any) => ({
+            id: app.id,
+            type: app.loadType === "domestic" ? "New Connection" : `${app.loadType} Connection`,
+            status: app.status === "pending" ? "In Progress" : app.status === "approved" ? "Completed" : "Rejected",
+            date: app.applicationDate,
+            statusColor: app.status === "pending" ? "blue" : app.status === "approved" ? "green" : "red",
+          })));
+          
+          setComplaints(complaintList.map((complaint: any) => ({
+            id: complaint.id,
+            type: complaint.type,
+            status: complaint.status === "pending" ? "In Progress" : complaint.status === "in-progress" ? "In Progress" : "Resolved",
+            date: complaint.createdAt,
+            statusColor: complaint.status === "resolved" ? "green" : complaint.status === "in-progress" ? "blue" : "yellow",
+          })));
+        }
+      } catch (error) {
+        console.error("Error fetching trackings:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTrackings();
+  }, [token]);
+
+  // WebSocket connection for real-time updates
+  useEffect(() => {
+    if (!user?.phone) return;
+
+    // Connect to WebSocket
+    const socket = wsService.connect();
+    wsService.joinCitizenRoom(user.phone);
+
+    // Track connection status
+    const checkConnection = () => {
+      setWsConnected(wsService.isConnected());
+    };
+
+    checkConnection();
+    const connectionInterval = setInterval(checkConnection, 5000);
+
+    // Handle real-time tracking updates
+    const handleTrackingUpdate = (data: any) => {
+      console.log('🔄 Real-time tracking update:', data);
+      
+      if (data.type === 'complaint') {
+        toast.success(`Complaint Update: ${data.message}`, {
+          description: 'Status updated in real-time'
+        });
+        
+        // Update complaints list
+        setComplaints(prev => prev.map(c => 
+          c.id === data.id 
+            ? { 
+                ...c, 
+                status: data.status === 'resolved' ? 'Resolved' : 'In Progress',
+                statusColor: data.status === 'resolved' ? 'green' : 'blue'
+              }
+            : c
+        ));
+      } else if (data.type === 'application') {
+        toast.success(`Application Update: ${data.message}`, {
+          description: 'Status updated in real-time'
+        });
+        
+        // Update applications list
+        setApplications(prev => prev.map(a => 
+          a.id === data.id 
+            ? { 
+                ...a, 
+                status: data.status === 'approved' ? 'Completed' : data.status === 'rejected' ? 'Rejected' : 'In Progress',
+                statusColor: data.status === 'approved' ? 'green' : data.status === 'rejected' ? 'red' : 'blue'
+              }
+            : a
+        ));
+      }
+    };
+
+    // Register event listener
+    wsService.onTrackingUpdated(handleTrackingUpdate);
+
+    // Cleanup
+    return () => {
+      clearInterval(connectionInterval);
+      wsService.disconnect();
+    };
+  }, [user?.phone]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
@@ -52,10 +131,29 @@ export function ElectricityTracking() {
         </Link>
 
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">Track Your Requests</h2>
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-2xl font-bold text-gray-900">Track Your Requests</h2>
+            <div className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm ${
+              wsConnected 
+                ? 'bg-green-100 text-green-800' 
+                : 'bg-yellow-100 text-yellow-800'
+            }`}>
+              <Activity className={`w-3 h-3 ${wsConnected ? 'animate-pulse' : ''}`} />
+              {wsConnected ? 'Live Updates' : 'Connecting...'}
+            </div>
+          </div>
 
-          {/* Applications Section */}
-          <div className="mb-8">
+          {loading && (
+            <div className="flex items-center justify-center py-12">
+              <Loader className="w-8 h-8 text-blue-600 animate-spin" />
+              <span className="ml-3 text-gray-600">Loading your requests...</span>
+            </div>
+          )}
+
+          {!loading && (
+            <>
+              {/* Applications Section */}
+              <div className="mb-8">
             <div className="flex items-center gap-2 mb-4">
               <FileText className="w-6 h-6 text-blue-600" />
               <h3 className="text-xl font-semibold text-gray-900">Applications</h3>
@@ -187,6 +285,8 @@ export function ElectricityTracking() {
                 Explore Services
               </Link>
             </div>
+          )}
+            </>
           )}
         </div>
       </div>

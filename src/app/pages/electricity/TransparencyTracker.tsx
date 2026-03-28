@@ -1,6 +1,9 @@
 import { Header } from "../../components/Header";
 import { AIChatbot } from "../../components/AIChatbot";
 import { Link, useParams } from "react-router";
+import { useState, useEffect } from "react";
+import { electricityApi } from "../../services/electricityApi";
+import { Loader2 } from "lucide-react";
 import {
   ArrowLeft,
   CheckCircle2,
@@ -13,54 +16,54 @@ import {
   IndianRupee,
 } from "lucide-react";
 
-const PROCESS_STEPS = [
-  {
-    id: 1,
-    title: "Application Submitted",
-    description: "Your application has been received successfully",
-    status: "completed",
-    date: "2026-03-20 10:30 AM",
-    icon: FileCheck,
-  },
-  {
-    id: 2,
-    title: "Document Verification",
-    description: "Verifying submitted documents and details",
-    status: "completed",
-    date: "2026-03-21 02:15 PM",
-    icon: Search,
-  },
-  {
-    id: 3,
-    title: "Site Inspection",
-    description: "Technical team will visit the premises",
-    status: "in-progress",
-    date: "Scheduled: 2026-03-25",
-    icon: Wrench,
-  },
-  {
-    id: 4,
-    title: "Approval",
-    description: "Final approval from department head",
-    status: "pending",
-    date: "Pending",
-    icon: ThumbsUp,
-  },
-  {
-    id: 5,
-    title: "Installation",
-    description: "Meter installation and connection",
-    status: "pending",
-    date: "Pending",
-    icon: CheckCircle2,
-  },
-];
-
 export function TransparencyTracker() {
   const { id } = useParams();
+  const [appData, setAppData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const token = localStorage.getItem("sessionToken") || "";
 
-  const currentStepIndex = PROCESS_STEPS.findIndex((step) => step.status === "in-progress");
-  const progressPercentage = ((currentStepIndex + 1) / PROCESS_STEPS.length) * 100;
+  useEffect(() => {
+    const fetchApp = async () => {
+      if (token && id) {
+        const response = await electricityApi.getApplicationById(id, token);
+        if (response.success) {
+          setAppData(response.data);
+        }
+        setLoading(false);
+      } else {
+        setLoading(false);
+      }
+    };
+    fetchApp();
+  }, [id, token]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50 flex items-center justify-center">
+        <div className="text-center">
+          <Loader2 className="w-8 h-8 animate-spin mx-auto mb-4 text-blue-600" />
+          <p>Loading application timeline...</p>
+        </div>
+      </div>
+    );
+  }
+
+  const timeline = appData?.timeline || [{
+    id: 1, 
+    status: "completed", 
+    date: appData?.applicationDate || new Date().toLocaleDateString(), 
+    title: "Submitted"
+  }];
+  const currentStepIndex = timeline.findIndex(step => step.status === "in-progress") || 0;
+  const progressPercentage = Math.max(20, ((currentStepIndex + 1) / 5) * 100);
+
+  const STEPS_CONFIG = [
+    { id: 1, title: "Application Submitted", icon: FileCheck, description: "Your application has been received successfully" },
+    { id: 2, title: "Document Verification", icon: Search, description: "Verifying submitted documents and details" },
+    { id: 3, title: "Site Inspection", icon: Wrench, description: "Technical team will visit the premises" },
+    { id: 4, title: "Approval", icon: ThumbsUp, description: "Final approval from department head" },
+    { id: 5, title: "Installation", icon: CheckCircle2, description: "Meter installation and connection" },
+  ];
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
@@ -79,114 +82,99 @@ export function TransparencyTracker() {
           <div className="flex items-center justify-between mb-8">
             <div>
               <h2 className="text-2xl font-bold text-gray-900 mb-2">
-                Transparency Tracker
+                Transparency Tracker - {id}
               </h2>
-              <p className="text-gray-600">Application ID: {id}</p>
+              <p className="text-gray-600">Real-time application status updates</p>
             </div>
             <div className="text-right">
-              <p className="text-sm text-gray-600">Current Status</p>
-              <p className="text-lg font-semibold text-blue-600">Site Inspection</p>
+              <p className="text-sm text-gray-600">Progress</p>
+              <p className="text-lg font-semibold text-blue-600">{Math.round(progressPercentage)}%</p>
             </div>
           </div>
 
-          {/* Overall Progress */}
+          {/* Overall Progress Bar */}
           <div className="mb-8">
-            <div className="flex items-center justify-between mb-2">
-              <p className="text-sm font-medium text-gray-700">Overall Progress</p>
-              <p className="text-sm font-semibold text-blue-600">
-                {Math.round(progressPercentage)}%
-              </p>
+            <div className="flex items-center justify-between mb-3">
+              <span className="text-sm font-medium text-gray-700">Overall Progress</span>
+              <span className="text-sm font-semibold text-blue-600">{Math.round(progressPercentage)}%</span>
             </div>
-            <div className="h-3 bg-gray-200 rounded-full overflow-hidden">
+            <div className="w-full bg-gray-200 rounded-full h-3">
               <div
-                className="h-full bg-gradient-to-r from-blue-600 to-green-600 transition-all duration-500"
+                className="bg-gradient-to-r from-blue-600 to-green-600 h-3 rounded-full transition-all duration-1000"
                 style={{ width: `${progressPercentage}%` }}
               />
             </div>
           </div>
 
-          {/* Timeline */}
+          {/* Dynamic Timeline */}
           <div className="space-y-6 mb-8">
-            {PROCESS_STEPS.map((step, index) => {
-              const Icon = step.icon;
-              return (
-                <div key={step.id} className="relative">
-                  {index < PROCESS_STEPS.length - 1 && (
-                    <div
-                      className={`absolute left-6 top-14 w-0.5 h-16 ${
-                        step.status === "completed"
-                          ? "bg-green-500"
-                          : step.status === "in-progress"
-                          ? "bg-blue-500"
-                          : "bg-gray-300"
-                      }`}
-                    />
-                  )}
+            {STEPS_CONFIG.map((stepConfig, index) => {
+              const stepData = timeline.find(s => s.id === stepConfig.id) || stepConfig;
+              const Icon = stepConfig.icon;
+              const isCompleted = stepData.status === "completed";
+              const isInProgress = stepData.status === "in-progress";
+              const isPending = stepData.status === "pending";
 
-                  <div
-                    className={`flex gap-4 p-4 rounded-xl transition-all ${
-                      step.status === "completed"
-                        ? "bg-green-50 border-2 border-green-200"
-                        : step.status === "in-progress"
-                        ? "bg-blue-50 border-2 border-blue-400 shadow-lg"
-                        : "bg-gray-50 border-2 border-gray-200"
-                    }`}
-                  >
-                    <div
-                      className={`w-12 h-12 rounded-full flex items-center justify-center flex-shrink-0 ${
-                        step.status === "completed"
-                          ? "bg-green-500"
-                          : step.status === "in-progress"
-                          ? "bg-blue-500 animate-pulse"
-                          : "bg-gray-300"
-                      }`}
-                    >
-                      <Icon className="w-6 h-6 text-white" />
+              return (
+                <div key={stepConfig.id} className="relative pb-8">
+                  {index < STEPS_CONFIG.length - 1 && (
+                    <div className={`absolute left-[22px] top-16 w-0.5 h-20 transform -translate-x-1/2 ${
+                      isCompleted ? 'bg-green-500' : 
+                      isInProgress ? 'bg-blue-500' : 'bg-gray-300'
+                    }`} />
+                  )}
+                  
+                  <div className={`flex items-start gap-4 p-6 rounded-2xl transition-all ${
+                    isCompleted ? 'bg-green-50 border-2 border-green-200 shadow-md' :
+                    isInProgress ? 'bg-blue-50 border-2 border-blue-300 shadow-lg ring-2 ring-blue-200/50' :
+                    'bg-gray-50 border border-gray-200 hover:border-gray-300'
+                  }`}>
+                    <div className={`w-14 h-14 rounded-2xl flex items-center justify-center flex-shrink-0 shadow-lg ${
+                      isCompleted ? 'bg-green-500' :
+                      isInProgress ? 'bg-blue-500 animate-pulse shadow-blue-200' :
+                      'bg-gray-300'
+                    }`}>
+                      <Icon className="w-7 h-7 text-white" />
                     </div>
 
-                    <div className="flex-1">
-                      <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-start justify-between mb-3">
                         <div>
-                          <h3
-                            className={`font-semibold text-lg ${
-                              step.status === "completed"
-                                ? "text-green-900"
-                                : step.status === "in-progress"
-                                ? "text-blue-900"
-                                : "text-gray-600"
-                            }`}
-                          >
-                            {step.title}
+                          <h3 className={`font-bold text-xl ${
+                            isCompleted ? 'text-green-900' :
+                            isInProgress ? 'text-blue-900' :
+                            'text-gray-700'
+                          }`}>
+                            {stepConfig.title}
                           </h3>
-                          <p className="text-sm text-gray-600 mt-1">{step.description}</p>
+                          <p className={`mt-1 text-sm ${
+                            isCompleted ? 'text-green-700' :
+                            isInProgress ? 'text-blue-700' :
+                            'text-gray-500'
+                          }`}>
+                            {stepConfig.description}
+                          </p>
                         </div>
-                        <div
-                          className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                            step.status === "completed"
-                              ? "bg-green-100 text-green-700"
-                              : step.status === "in-progress"
-                              ? "bg-blue-100 text-blue-700"
-                              : "bg-gray-100 text-gray-600"
-                          }`}
-                        >
-                          {step.status === "completed"
-                            ? "Completed"
-                            : step.status === "in-progress"
-                            ? "In Progress"
-                            : "Pending"}
+                        <div className={`px-3 py-1 rounded-full text-xs font-bold whitespace-nowrap ${
+                          isCompleted ? 'bg-green-100 text-green-800' :
+                          isInProgress ? 'bg-blue-100 text-blue-800 ring-1 ring-blue-200' :
+                          'bg-gray-100 text-gray-600'
+                        }`}>
+                          {stepData.status === "completed" ? "✓ Completed" :
+                           stepData.status === "in-progress" ? "🔄 In Progress" :
+                           "⏳ Pending"}
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 text-sm text-gray-600">
+                      <div className="flex items-center gap-3 text-xs text-gray-500 mb-3">
                         <Calendar className="w-4 h-4" />
-                        {step.date}
+                        <span>{stepData.date || "Pending"}</span>
                       </div>
 
-                      {step.status === "in-progress" && (
-                        <div className="mt-3 p-3 bg-white rounded-lg border border-blue-200">
-                          <p className="text-sm text-blue-800">
-                            <strong>Next Action:</strong> Our technical team will visit your
-                            premises on March 25, 2026 between 10 AM - 2 PM
+                      {isInProgress && (
+                        <div className="p-4 bg-white/50 backdrop-blur-sm rounded-xl border border-blue-200 shadow-sm">
+                          <p className="text-sm font-medium text-blue-800">
+                            <strong>Next Action:</strong> Our technical team will complete this step within 2-3 working days.
                           </p>
                         </div>
                       )}
@@ -197,57 +185,45 @@ export function TransparencyTracker() {
             })}
           </div>
 
-          {/* Fee Breakdown */}
-          <div className="bg-gradient-to-r from-blue-50 to-green-50 rounded-xl p-6 mb-6">
-            <h3 className="font-semibold text-gray-900 mb-4 flex items-center gap-2">
-              <IndianRupee className="w-5 h-5" />
-              Fee Breakdown
-            </h3>
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <p className="text-gray-700">Registration Fee</p>
-                <p className="font-semibold text-gray-900">₹500</p>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="text-gray-700">Load Charges (5 kW)</p>
-                <p className="font-semibold text-gray-900">₹50</p>
-              </div>
-              <div className="flex items-center justify-between">
-                <p className="text-gray-700">Processing Fee</p>
-                <p className="font-semibold text-gray-900">₹200</p>
-              </div>
-              <div className="border-t-2 border-gray-300 pt-3 flex items-center justify-between">
-                <p className="text-lg font-semibold text-gray-900">Total Amount</p>
-                <p className="text-2xl font-bold text-blue-600">₹750</p>
+          {/* Application Details */}
+          <div className="grid md:grid-cols-2 gap-6 mb-8">
+            <div className="bg-gradient-to-r from-blue-50 to-indigo-50 p-6 rounded-2xl border border-blue-200">
+              <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <IndianRupee className="w-5 h-5 text-green-600" />
+                Fee Breakdown (₹{appData?.fee || 750})
+              </h3>
+              <div className="space-y-2 text-sm">
+                <div className="flex justify-between">
+                  <span>Registration Fee</span>
+                  <span>₹500</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Load Charges ({appData?.loadValue || 2} kW)</span>
+                  <span>₹{(appData?.loadValue || 2)*10}</span>
+                </div>
+                <div className="flex justify-between">
+                  <span>Processing Fee</span>
+                  <span>₹200</span>
+                </div>
               </div>
             </div>
-            <div className="mt-4 p-3 bg-white rounded-lg border border-blue-200">
-              <p className="text-sm text-blue-800">
-                Payment will be collected after final approval
+            <div className="bg-gradient-to-r from-green-50 to-emerald-50 p-6 rounded-2xl border border-green-200">
+              <h3 className="font-bold text-gray-900 mb-4 flex items-center gap-2">
+                <Clock className="w-5 h-5 text-yellow-600" />
+                Estimated Timeline
+              </h3>
+              <p className="text-sm text-green-800">
+                Connection complete in <strong>7-10 working days</strong> after final approval
               </p>
             </div>
           </div>
 
-          {/* Estimated Timeline */}
-          <div className="bg-yellow-50 border-l-4 border-yellow-500 rounded-lg p-4">
-            <h3 className="font-semibold text-yellow-900 mb-2 flex items-center gap-2">
-              <Clock className="w-5 h-5" />
-              Estimated Timeline
-            </h3>
-            <p className="text-sm text-yellow-800">
-              Your connection will be completed within <strong>7-10 working days</strong> from
-              the date of final approval.
+          <div className="text-center p-8 bg-blue-50 rounded-2xl border-2 border-blue-200">
+            <p className="text-lg font-semibold text-blue-900 mb-2">
+              Need Help?
             </p>
-          </div>
-
-          {/* Help Section */}
-          <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-            <p className="text-sm text-blue-800">
-              <strong>Need Help?</strong> Contact our helpline at{" "}
-              <a href="tel:1912" className="font-semibold underline">
-                1912
-              </a>{" "}
-              or use the AI chatbot for instant assistance.
+            <p className="text-blue-800">
+              Call helpline <a href="tel:1912" className="font-bold underline hover:text-blue-900">1912</a> or chat with AI assistant
             </p>
           </div>
         </div>

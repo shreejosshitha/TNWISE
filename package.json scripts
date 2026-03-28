@@ -1,0 +1,4 @@
+No, edit package.json.
+
+Add "dev": "concurrently \"vite\" \"tsx watch src/backend/server.ts\""
+

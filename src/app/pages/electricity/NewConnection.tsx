@@ -4,6 +4,8 @@ import { AIChatbot } from "../../components/AIChatbot";
 import { Link, useNavigate } from "react-router";
 import { ArrowLeft, ArrowRight, Upload, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { useAuth } from "../../context/AuthContext";
+import { electricityApi } from "../../services/electricityApi";
 
 const STEPS = [
   "Personal Details",
@@ -33,7 +35,9 @@ export function NewConnection() {
     },
   });
   const [applicationId, setApplicationId] = useState("");
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { user } = useAuth();
 
   const handleNext = () => {
     if (currentStep < STEPS.length - 1) {
@@ -47,10 +51,44 @@ export function NewConnection() {
     }
   };
 
-  const handleSubmit = () => {
-    const appId = `EB${Date.now()}`;
-    setApplicationId(appId);
-    toast.success("Application submitted successfully!");
+  const handleSubmit = async () => {
+    // Get session token from localStorage
+    const token = localStorage.getItem('sessionToken');  
+    if (!token) {
+      toast.error("Session expired, please login again");
+      return;
+    }
+
+    if (!formData.name || !formData.phone || !formData.address || !formData.city || !formData.pincode) {
+      toast.error("Please fill all required fields");
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const response = await electricityApi.createApplication({
+        name: formData.name,
+        address: formData.address,
+        city: formData.city,
+        pincode: formData.pincode,
+        loadType: formData.loadType || "domestic",
+        loadValue: parseInt(formData.loadValue) || 2,
+        purpose: formData.purpose || "New residential connection",
+        documents: formData.documents,
+      }, token);
+
+      if (response.success && response.data?.id) {
+        setApplicationId(response.data.id);
+        toast.success("Application submitted successfully!");
+      } else {
+        toast.error(response.message || "Failed to submit application");
+      }
+    } catch (error) {
+      toast.error("Error submitting application");
+      console.error(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleFileUpload = (docType: string) => {
@@ -441,9 +479,10 @@ export function NewConnection() {
             ) : (
               <button
                 onClick={handleSubmit}
-                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold flex items-center gap-2 transition-colors"
+                disabled={loading}
+                className="px-6 py-3 bg-green-600 hover:bg-green-700 disabled:bg-green-400 text-white rounded-lg font-semibold flex items-center gap-2 transition-colors"
               >
-                Submit Application
+                {loading ? "Submitting..." : "Submit Application"}
                 <CheckCircle2 className="w-5 h-5" />
               </button>
             )}
