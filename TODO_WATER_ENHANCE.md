@@ -1,0 +1,1 @@
+- [x] 1. Refactor WaterUsageCalculator.tsx to match EnergyCalculator.tsx structure (header bar, 4 overview cards, 3 tabs with full CRUD/presets/export)

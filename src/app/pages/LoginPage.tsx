@@ -1,6 +1,5 @@
 import { useState } from "react";
-import { Header } from "../components/Header";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { Phone, Shield, User, Building, Lock, Mail, Eye, EyeOff, Loader } from "lucide-react";
 import { useAuth } from "../context/AuthContext";
 import { Department } from "../context/AuthContext";
@@ -49,7 +48,7 @@ export function LoginPage() {
 
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/auth/send-otp', {
+      const response = await fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone }),
@@ -80,7 +79,7 @@ export function LoginPage() {
 
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/auth/verify-otp', {
+      const response = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone, otp }),
@@ -134,7 +133,7 @@ export function LoginPage() {
 
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/auth/send-otp', {
+      const response = await fetch('/api/auth/send-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: adminPhone }),
@@ -164,7 +163,7 @@ export function LoginPage() {
 
     setIsLoading(true);
     try {
-      const response = await fetch('http://localhost:3001/api/auth/verify-otp', {
+      const response = await fetch('/api/auth/verify-otp', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ phone: adminPhone, otp: adminOtp }),
@@ -230,7 +229,6 @@ export function LoginPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      <Header />
 
       <div className="max-w-md mx-auto px-4 py-20">
         <div className="bg-white rounded-2xl shadow-xl p-8">

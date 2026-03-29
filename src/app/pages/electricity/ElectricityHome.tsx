@@ -1,9 +1,9 @@
-import { Header } from "../../components/Header";
 import { AIChatbot } from "../../components/AIChatbot";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { 
   CreditCard, Plus, FileText, Search, Zap, ArrowLeft, Crown, Shield, 
   Activity, Bell, Phone, Clock, Calculator, AlertTriangle, Lightbulb,
+
   TrendingUp, Users, MapPin, Calendar, Star, Award, CheckCircle,
   Battery, Thermometer, Wifi, WifiOff, Mic, MicOff, Bot, Sparkles,
   Gauge, DollarSign, Percent, Eye, Lock, Globe, Smartphone, Landmark
@@ -339,8 +339,8 @@ export function ElectricityHome() {
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
       {/* Government Header */}
       <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white shadow-lg">
-        <Header showAuth={true} />
         <div className="px-4 py-6">
+
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between">
               <div className="flex items-center space-x-6">

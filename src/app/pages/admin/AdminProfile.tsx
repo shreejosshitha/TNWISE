@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { Header } from "../../components/Header";
 import { AIChatbot } from "../../components/AIChatbot";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { 
   ArrowLeft, 
   User, 

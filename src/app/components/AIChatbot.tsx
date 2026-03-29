@@ -1,10 +1,12 @@
 import { MessageCircle, Send, Mic, X } from "lucide-react";
 import { useState } from "react";
+import { TranslationButton } from "./TranslationButton";
 
 export function AIChatbot() {
   const [isOpen, setIsOpen] = useState(false);
   const [message, setMessage] = useState("");
-  const [messages, setMessages] = useState<Array<{ sender: "user" | "bot"; text: string }>>([
+  const [selectedLanguage, setSelectedLanguage] = useState("en");
+  const [messages, setMessages] = useState<Array<{ sender: "user" | "bot"; text: string; translatedText?: string }>>([
     {
       sender: "bot",
       text: "Hello! I'm your AI assistant. How can I help you today?",
@@ -18,35 +20,79 @@ export function AIChatbot() {
     "Track my application",
   ];
 
+  const getBotResponse = (userMessage: string, lang: string) => {
+    const msg = userMessage.toLowerCase();
+    const isTamil = lang === 'ta';
+
+    // Payments / Bills
+    if (msg.includes('bill') || msg.includes('payment') || msg.includes('pay') || msg.includes('eb') || msg.includes('மணிக்கட்டணம்') || msg.includes('கட்டணம்') || msg.includes('அளவு')) {
+      return isTamil 
+        ? "EB மற்றும் நீர் கட்டணத்தை செலுத்துவதற்கு:\n1. உள்நுழையவும்\n2. Electricity/Water → Bill Payment\n3. Consumer No ஐ உள்ளிடவும்\n4. Pay Now\nஉங்கள் Consumer No தயவு செய்து கொடுங்கள்."
+        : "To pay EB/Water bills:\n1. Login\n2. Electricity/Water → Bill Payment\n3. Enter Consumer No\n4. Pay Now\nPlease share your Consumer No.";
+    }
+
+    // Complaints
+    if (msg.includes('complaint') || msg.includes('issue') || msg.includes('problem') || msg.includes('எ投ப்பளை') || msg.includes('பிரச்சனை') || msg.includes('அதிருப்தி')) {
+      return isTamil 
+        ? "எரிச்சல் புகார்:\n1. Electricity/Water → Complaint\n2. விவரங்களை உள்ளிடவும்\n3. Submit\nஉங்கள் Consumer No மற்றும் பிரச்சனை விவரம் கொடுங்கள்."
+        : "File complaints:\n1. Electricity/Water → Complaint\n2. Fill details\n3. Submit\nShare Consumer No and issue details.";
+    }
+
+    // New connection
+    if (msg.includes('new') || msg.includes('connection') || msg.includes('apply') || msg.includes('மெw') || msg.includes('இணைப்பு') || msg.includes('விண்ணப்பி')) {
+      return isTamil 
+        ? "புதிய இணைப்பு:\n1. Electricity/Water → New Connection\n2. Form நிரப்பவும்\n3. Documents upload செய்யவும்\nஉங்கள் முகவரி மற்றும் தேவை கொடுங்கள்."
+        : "New connection:\n1. Electricity/Water → New Connection\n2. Fill form\n3. Upload docs\nShare address and requirements.";
+    }
+
+    // Tracking
+    if (msg.includes('track') || msg.includes('status') || msg.includes('application') || msg.includes('நிலை') || msg.includes('பின்தொடர') || msg.includes('விண்ணப்பம்')) {
+      return isTamil 
+        ? "பின்தொடர:\n1. Electricity/Water → Tracking\n2. Application ID உள்ளிடவும்\nஉங்கள் App ID கொடுங்கள்."
+        : "Track status:\n1. Electricity/Water → Tracking\n2. Enter Application ID\nShare your App ID.";
+    }
+
+    // Navigation
+    if (msg.includes('login') || msg.includes('உள்நுழை')) {
+      return isTamil ? "உள்நுழை பக்கத்திற்கு செல்ல: /login" : "Go to login: /login";
+    }
+    if (msg.includes('dashboard') || msg.includes('டாஷ்போர்டு')) {
+      return isTamil ? "டாஷ்போர்டு: /dashboard" : "Dashboard: /dashboard";
+    }
+    if (msg.includes('electricity') || msg.includes('eb') || msg.includes('மின்சாரம்')) {
+      return isTamil ? "மின்சார சேவைகள்: /electricity" : "Electricity services: /electricity";
+    }
+    if (msg.includes('water') || msg.includes('நீர்')) {
+      return isTamil ? "நீர் சேவைகள்: /water" : "Water services: /water";
+    }
+
+    // General help
+    return isTamil 
+      ? "என்ன உதவி தேவை?\n• கட்டணம் செலுத்த\n• புகார் அளி\n• புதிய இணைப்பு\n• பின்தொடர\nமேலே உள்ள buttons ஐ கிளிக் செய்யவும் அல்லது விவரம் கொடுங்கள்."
+      : "How can I help?\n• Pay bills\n• Raise complaints\n• New connections\n• Track applications\nClick buttons above or provide details.";
+  };
+
   const handleSend = () => {
     if (!message.trim()) return;
 
-    setMessages([...messages, { sender: "user", text: message }]);
-
-    setTimeout(() => {
-      setMessages(prev => [
-        ...prev,
-        {
-          sender: "bot",
-          text: "I can help you with that. Please provide your consumer number or select from the quick actions above.",
-        },
-      ]);
-    }, 1000);
-
+    const userMsg = message.trim();
+    setMessages(prev => [...prev, { sender: "user", text: userMsg }]);
     setMessage("");
+
+    // Simulate typing delay
+    setTimeout(() => {
+      const botReply = getBotResponse(userMsg, selectedLanguage);
+      setMessages(prev => [...prev, { sender: "bot", text: botReply }]);
+    }, 800);
   };
 
   const handleSuggestion = (action: string) => {
-    setMessages([...messages, { sender: "user", text: action }]);
+    setMessages(prev => [...prev, { sender: "user", text: action }]);
+
     setTimeout(() => {
-      setMessages(prev => [
-        ...prev,
-        {
-          sender: "bot",
-          text: `Let me help you ${action.toLowerCase()}. Please provide the necessary details.`,
-        },
-      ]);
-    }, 1000);
+      const botReply = getBotResponse(action, selectedLanguage);
+      setMessages(prev => [...prev, { sender: "bot", text: botReply }]);
+    }, 800);
   };
 
   return (
@@ -94,12 +140,49 @@ export function AIChatbot() {
                   }`}
                 >
                   <p className="text-sm">{msg.text}</p>
+                  {msg.sender === "bot" && selectedLanguage !== "en" && (
+                    <div className="mt-2 pt-2 border-t border-gray-200">
+                      <TranslationButton
+                        text={msg.text}
+                        targetLanguage={selectedLanguage}
+                        sourceLanguage="en"
+                        onTranslated={(translated) => {
+                          setMessages(prev => prev.map((m, i) => 
+                            i === index ? { ...m, translatedText: translated } : m
+                          ));
+                        }}
+                        variant="ghost"
+                        size="sm"
+                        className="text-xs h-6 px-2"
+                      />
+                      {msg.translatedText && (
+                        <p className="text-xs text-gray-600 mt-1 italic">
+                          {msg.translatedText}
+                        </p>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
           </div>
 
           <div className="p-3 border-t border-gray-200">
+            {/* Language Selection */}
+            <div className="flex items-center gap-2 mb-3">
+              <span className="text-sm text-gray-600">Language:</span>
+              <select
+                value={selectedLanguage}
+                onChange={(e) => setSelectedLanguage(e.target.value)}
+                className="px-2 py-1 border border-gray-300 rounded text-sm"
+              >
+                <option value="en">English</option>
+                <option value="ta">தமிழ் (Tamil)</option>
+                <option value="hi">हिंदी (Hindi)</option>
+                <option value="te">తెలుగు (Telugu)</option>
+              </select>
+            </div>
+
             <div className="flex flex-wrap gap-2 mb-3">
               {suggestedActions.map((action, index) => (
                 <button

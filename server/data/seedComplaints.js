@@ -1,6 +1,5 @@
-import Complaint from "../models/Complaint.js";
-
-const sampleComplaints = [
+// Seed not needed with dummyData.js
+console.log("Using dummyData.js - no seed needed");
   {
     complaintId: "WTR-CMP-001",
     type: "Leakage",

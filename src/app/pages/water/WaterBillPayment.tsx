@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { Header } from "../../components/Header";
 import { AIChatbot } from "../../components/AIChatbot";
-import { Link, useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Search, CreditCard, CheckCircle2, Loader2, Download } from "lucide-react";
 import { toast } from "sonner";
 
@@ -467,8 +467,7 @@ export function WaterBillPayment() {
   if (paymentSuccess) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-        <Header showAuth={true} />
-        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8"> 
           <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 className="w-10 h-10 text-green-600" />
@@ -546,8 +545,7 @@ export function WaterBillPayment() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      <Header showAuth={true} />
-      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8"> 
         <Link to="/water" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6">
           <ArrowLeft className="w-5 h-5" />
           Back to Water Services

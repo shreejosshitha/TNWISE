@@ -1,4 +1,5 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter } from "react-router-dom";
+
 import { LandingPage } from "./pages/LandingPage";
 import { LoginPage } from "./pages/LoginPage";
 import { UserDashboard } from "./pages/UserDashboard";
@@ -14,6 +15,65 @@ import { WaterBillPayment } from "./pages/water/WaterBillPayment";
 import { WaterNewConnection } from "./pages/water/WaterNewConnection";
 import { WaterComplaint } from "./pages/water/WaterComplaint";
 import { WaterTracking } from "./pages/water/WaterTracking";
+import { WaterUsageCalculator } from "./pages/water/WaterUsageCalculator";
+import { WaterTransparencyTracker } from "./pages/water/TransparencyTracker";
+
+function ProtectedWaterHome() {
+  return (
+    <ProtectedRoute>
+      <WaterHome />
+    </ProtectedRoute>
+  );
+}
+
+function ProtectedWaterBillPayment() {
+  return (
+    <ProtectedRoute>
+      <WaterBillPayment />
+    </ProtectedRoute>
+  );
+}
+
+function ProtectedWaterNewConnection() {
+  return (
+    <ProtectedRoute>
+      <WaterNewConnection />
+    </ProtectedRoute>
+  );
+}
+
+function ProtectedWaterComplaint() {
+  return (
+    <ProtectedRoute>
+      <WaterComplaint />
+    </ProtectedRoute>
+  );
+}
+
+function ProtectedWaterTracking() {
+  return (
+    <ProtectedRoute>
+      <WaterTracking />
+    </ProtectedRoute>
+  );
+}
+
+function ProtectedWaterUsageCalculator() {
+  return (
+    <ProtectedRoute>
+      <WaterUsageCalculator />
+    </ProtectedRoute>
+  );
+}
+
+function ProtectedWaterTransparencyTracker() {
+  return (
+    <ProtectedRoute>
+      <WaterTransparencyTracker />
+    </ProtectedRoute>
+  );
+}
+
 import { MunicipalHome } from "./pages/municipal/MunicipalHome";
 import { MunicipalComplaint } from "./pages/municipal/MunicipalComplaint";
 import { PropertyTax } from "./pages/municipal/PropertyTax";
@@ -78,19 +138,28 @@ function ProtectedAdminDashboard() {
   );
 }
 
+import { RootLayout } from './layout/RootLayout';
+// import { NotFound } from './pages/NotFound';
+
 export const router = createBrowserRouter([
   {
+    basename: "/",
     path: "/",
-    Component: LandingPage,
-  },
-  {
-    path: "/login",
-    Component: LoginPage,
-  },
-  {
-    path: "/dashboard",
-    Component: ProtectedUserDashboard,
-  },
+    errorElement: <NotFound />,
+    element: <RootLayout />,
+    children: [
+      {
+        index: true,
+        Component: LandingPage,
+      },
+      {
+        path: "/login",
+        Component: LoginPage,
+      },
+      {
+        path: "/dashboard",
+        Component: ProtectedUserDashboard,
+      },
   {
     path: "/electricity",
     Component: ElectricityHome,
@@ -121,28 +190,47 @@ export const router = createBrowserRouter([
   },
   {
     path: "/water",
-    Component: WaterHome,
+    Component: ProtectedWaterHome,
   },
   {
     path: "/water/bill-payment",
-    Component: WaterBillPayment,
+    Component: ProtectedWaterBillPayment,
   },
   {
     path: "/water/new-connection",
-    Component: WaterNewConnection,
+    Component: ProtectedWaterNewConnection,
   },
   {
     path: "/water/complaint",
-    Component: WaterComplaint,
+    Component: ProtectedWaterComplaint,
   },
   {
     path: "/water/tracking",
-    Component: WaterTracking,
+    Component: ProtectedWaterTracking,
   },
   {
-    path: "/municipal",
-    Component: MunicipalHome,
+    path: "/water/calculator",
+    Component: ProtectedWaterUsageCalculator,
   },
+  {
+    path: "/water/transparency",
+    Component: ProtectedWaterTransparencyTracker,
+  },
+  {
+    path: "/water/tracker/:id",
+    Component: ProtectedWaterTransparencyTracker,
+  },
+
+  {
+    path: "/municipal",
+    Component: () => (
+      <ProtectedRoute>
+        <MunicipalHome />
+      </ProtectedRoute>
+    ),
+  },
+
+
   {
     path: "/municipal/complaint",
     Component: MunicipalComplaint,
@@ -191,9 +279,7 @@ export const router = createBrowserRouter([
     path: "/admin/transport",
     Component: ProtectedTransportAdminDashboard,
   },
-  {
-    path: "*",
-    Component: NotFound,
+  ],
   },
 ]);
 

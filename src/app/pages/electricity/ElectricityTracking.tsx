@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
-import { Header } from "../../components/Header";
 import { AIChatbot } from "../../components/AIChatbot";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { ArrowLeft, FileText, AlertCircle, Clock, CheckCircle2, Loader, Activity } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 import { electricityApi } from "../../services/electricityApi";
@@ -33,7 +32,7 @@ export function ElectricityTracking() {
             type: app.loadType === "domestic" ? "New Connection" : `${app.loadType} Connection`,
             status: app.status === "pending" ? "In Progress" : app.status === "approved" ? "Completed" : "Rejected",
             date: app.applicationDate,
-            statusColor: app.status === "pending" ? "blue" : app.status === "approved" ? "green" : "red",
+            statusColor: app.status === "pending" ? "yellow" : app.status === "approved" ? "green" : "red",
           })));
           
           setComplaints(complaintList.map((complaint: any) => ({
@@ -100,7 +99,7 @@ export function ElectricityTracking() {
             ? { 
                 ...a, 
                 status: data.status === 'approved' ? 'Completed' : data.status === 'rejected' ? 'Rejected' : 'In Progress',
-                statusColor: data.status === 'approved' ? 'green' : data.status === 'rejected' ? 'red' : 'blue'
+                statusColor: data.status === 'approved' ? 'green' : data.status === 'rejected' ? 'red' : 'yellow'
               }
             : a
         ));
@@ -119,9 +118,8 @@ export function ElectricityTracking() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      <Header showAuth={true} />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"> 
         <Link
           to="/electricity"
           className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6"
@@ -173,7 +171,9 @@ export function ElectricityTracking() {
                     </div>
                     <div
                       className={`px-4 py-2 rounded-full font-semibold text-sm ${
-                        app.statusColor === "blue"
+                        app.statusColor === "yellow"
+                          ? "bg-yellow-100 text-yellow-700"
+                          : app.statusColor === "blue"
                           ? "bg-blue-100 text-blue-700"
                           : "bg-green-100 text-green-700"
                       }`}
@@ -184,9 +184,9 @@ export function ElectricityTracking() {
 
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-600">Submitted on {app.date}</p>
-                    {app.statusColor === "blue" ? (
-                      <div className="flex items-center gap-2 text-blue-600">
-                        <div className="w-2 h-2 bg-blue-600 rounded-full animate-pulse"></div>
+                    {app.statusColor === "yellow" ? (
+                      <div className="flex items-center gap-2 text-yellow-600">
+                        <div className="w-2 h-2 bg-yellow-600 rounded-full animate-pulse"></div>
                         <span className="text-sm font-medium">View Progress →</span>
                       </div>
                     ) : (
@@ -197,11 +197,11 @@ export function ElectricityTracking() {
                     )}
                   </div>
 
-                  {app.statusColor === "blue" && (
-                    <div className="mt-4 pt-4 border-t border-blue-200">
+                  {app.statusColor === "yellow" && (
+                    <div className="mt-4 pt-4 border-t border-yellow-200">
                       <div className="flex items-center gap-2">
                         <div className="flex-1 bg-gray-200 rounded-full h-2">
-                          <div className="bg-gradient-to-r from-blue-600 to-green-600 h-2 rounded-full w-3/5"></div>
+                          <div className="bg-gradient-to-r from-yellow-600 to-green-600 h-2 rounded-full w-3/5"></div>
                         </div>
                         <span className="text-sm font-medium text-gray-700">60%</span>
                       </div>

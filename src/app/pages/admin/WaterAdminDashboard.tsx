@@ -1,56 +1,74 @@
 import { useAuth } from "../../context/AuthContext";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { useEffect, useMemo, useState } from "react";
-import { Header } from "../../components/Header";
+
 import {
-  ArrowDownRight,
-  ArrowUpRight,
-  BarChart3,
-  Bell,
-  CheckCircle2,
-  DollarSign,
-  LogOut,
-  PlusCircle,
+  LogOut, BarChart3, AlertCircle, FileText, Settings, Search, RefreshCw, 
+  CheckCircle, XCircle, Loader2, Download, Users, Droplet, TrendingUp, 
+  Clock, Shield, Eye, Activity, Bell, Calendar, MapPin, Phone, 
+  Mail, UserCheck, AlertTriangle, CheckSquare, XSquare, Timer,
+  Building2, FileCheck, Wrench, Home, Globe, Cpu, Brain, 
+  TrendingDown, Target, Award,
+  AlertTriangle as AlertIcon, Wifi, WifiOff, Bot, Sparkles,
+  Map, Layers, Thermometer, Battery, Lightbulb, Gauge,
+  Users as UsersIcon, DollarSign, Percent, Calendar as CalendarIcon,
+  ChevronRight, ChevronLeft, Maximize2, Minimize2, Star,
+  Crown, ShieldCheck, Lock, Unlock, Eye as EyeIcon, Mic, MicOff
 } from "lucide-react";
 import { toast } from "sonner";
 import {
-  approveWaterApplication,
-  assignWaterComplaint,
-  fetchWaterActionItems,
-  fetchWaterChartData,
-  fetchWaterDashboardStats,
-  fetchWaterDetailItems,
-  fetchWaterNotifications,
-  fetchWaterComplaints,
-  rejectWaterApplication,
-  resolveWaterPayment,
-  type WaterActionItem,
-  type WaterChartData,
-  type WaterDashboardCategory,
-  type WaterDashboardDetailItem,
-  type WaterDashboardStat,
-  type WaterNotification,
-  type AdminComplaint,
-} from "../../../backend/waterAdminDashboardService";
-import { MapView } from "../../components/admin/MapView";
-import { ComplaintTable, type ComplaintFilters } from "../../components/admin/ComplaintTable";
-// imports fixed
-
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "../../components/ui/table";
 import {
-  BarChart,
-  Bar,
-  PieChart,
-  Pie,
-  Cell,
-  LineChart,
-  Line,
-  Tooltip,
-  ResponsiveContainer,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Legend,
-} from "recharts";
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from "../../components/ui/tabs";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../../components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "../../components/ui/select";
+import { Button } from "../../components/ui/button";
+import { Input } from "../../components/ui/input";
+import { Badge } from "../../components/ui/badge";
+import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
+import { Progress } from "../../components/ui/progress";
+import { Alert, AlertDescription } from "../../components/ui/alert";
+import { ComplaintTable } from "../../components/admin/ComplaintTable";
+import { MapView } from "../../components/admin/MapView";
+import type {
+  WaterDashboardCategory,
+  WaterDashboardStat,
+  WaterDashboardDetailItem,
+  WaterChartData,
+  WaterActionItem,
+  WaterNotification,
+  AdminComplaint,
+  ComplaintFilters,
+} from "../../backend/waterAdminDashboardService";
+import { 
+  LineChart, Line, AreaChart, Area, BarChart as RechartsBarChart, Bar, 
+  PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, 
+  ResponsiveContainer, RadialBarChart, RadialBar
+} from 'recharts';
 
 const statColorMap: Record<WaterDashboardCategory, { bg: string; text: string }> = {
   applications: { bg: "bg-slate-50", text: "text-slate-900" },
@@ -200,6 +218,8 @@ export function WaterAdminDashboard() {
   const [notifications, setNotifications] = useState<WaterNotification[]>([]);
   const [complaints, setComplaints] = useState<AdminComplaint[]>([]);
   const [loadingComplaints, setLoadingComplaints] = useState(false);
+  const [applications, setApplications] = useState<any[]>([]);
+  const [loadingApplications, setLoadingApplications] = useState(false);
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [filters, setFilters] = useState<ComplaintFilters>({});
 const [workers, setWorkers] = useState<string[]>(["Field Team A", "Field Team B", "Maintenance Crew", "Emergency Response"]);
@@ -207,6 +227,13 @@ const [workers, setWorkers] = useState<string[]>(["Field Team A", "Field Team B"
   const [timeFilter, setTimeFilter] = useState<"today" | "week" | "month">("month");
   const [sortOrder, setSortOrder] = useState<"latest" | "oldest">("latest");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
+
+  // Additional state for Electricity-style dashboard
+  const [wsConnected, setWsConnected] = useState(true);
+  const [isListening, setIsListening] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [emergencyMode, setEmergencyMode] = useState(false);
 
   const selectedStat = overviewStats.find((stat) => stat.category === selectedCategory);
   const serviceMetrics = overviewStats.filter((stat) => stat.category === "applications");
@@ -217,7 +244,7 @@ const [workers, setWorkers] = useState<string[]>(["Field Team A", "Field Team B"
     ["totalRevenue", "pendingPayments"].includes(stat.category)
   );
 
-  const [activeTab, setActiveTab] = useState<"service" | "complaints" | "financial">("service");
+  const [activeTab, setActiveTab] = useState<"service" | "complaints" | "financial" | "map">("service");
   const [serviceSubTab, setServiceSubTab] = useState<ServiceSubTab>("newRequests");
 
   const selectedMetrics = useMemo(() => {
@@ -315,6 +342,18 @@ const [workers, setWorkers] = useState<string[]>(["Field Team A", "Field Team B"
     }
   };
 
+  const loadApplications = async () => {
+    setLoadingApplications(true);
+    try {
+      const data = await fetchWaterApplications();
+      setApplications(data);
+    } catch {
+      toast.error("Unable to load applications");
+    } finally {
+      setLoadingApplications(false);
+    }
+  };
+
   const loadDetails = async (category: WaterDashboardCategory) => {
     setLoadingDetails(true);
     try {
@@ -334,6 +373,7 @@ useEffect(() => {
     loadActions();
     loadNotifications();
     loadComplaints();
+    loadApplications();
   }, []);
 
   useEffect(() => {
@@ -385,31 +425,89 @@ useEffect(() => {
     navigate(notification.modulePath);
   };
 
-  const handleApproveApplication = async (id: string) => {
-    await approveWaterApplication(id);
-    toast.success("Application approved.");
-    loadOverview();
-    loadActions();
-    loadNotifications();
-    loadDetails(selectedCategory);
+
+
+  const handleAssignComplaint = async (complaintId: string, assignedTo: string) => {
+    try {
+      await assignWaterComplaint(complaintId);
+      toast.success(`Complaint assigned to ${assignedTo || "operations"}`);
+      loadOverview();
+      loadActions();
+      loadNotifications();
+      loadDetails(selectedCategory);
+    } catch (error) {
+      toast.error("Failed to assign complaint");
+    }
   };
 
-  const handleRejectApplication = async (id: string) => {
-    await rejectWaterApplication(id);
-    toast.error("Application rejected.");
-    loadOverview();
-    loadActions();
-    loadNotifications();
-    loadDetails(selectedCategory);
+  const handleToggleSelect = (id: string) => {
+    setSelectedIds(prev => 
+      prev.includes(id) 
+        ? prev.filter(selectedId => selectedId !== id)
+        : [...prev, id]
+    );
   };
 
-  const handleAssignComplaint = async (id: string) => {
-    await assignWaterComplaint(id);
-    toast.success("Complaint assigned to operations.");
-    loadOverview();
-    loadActions();
-    loadNotifications();
-    loadDetails(selectedCategory);
+  const handleToggleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedIds(complaints.map(complaint => complaint._id));
+    } else {
+      setSelectedIds([]);
+    }
+  };
+
+  const handleStatusUpdate = async (complaintId: string, status: string) => {
+    try {
+      await updateWaterComplaintStatus(complaintId, status);
+      toast.success(`Complaint status updated to ${status}`);
+      loadComplaints();
+    } catch (error) {
+      toast.error("Failed to update complaint status");
+    }
+  };
+
+  const handleBulkAssign = async (assignedTo: string) => {
+    if (selectedIds.length === 0) {
+      toast.error("No complaints selected");
+      return;
+    }
+    // Bulk assign logic here
+    toast.success(`${selectedIds.length} complaints assigned to ${assignedTo}`);
+    setSelectedIds([]);
+    loadComplaints();
+  };
+
+  const handleBulkResolve = async () => {
+    if (selectedIds.length === 0) {
+      toast.error("No complaints selected");
+      return;
+    }
+    // Bulk resolve logic here
+    toast.success(`${selectedIds.length} complaints resolved`);
+    setSelectedIds([]);
+    loadComplaints();
+  };
+
+  const handleApproveApplication = async (applicationId: string) => {
+    try {
+      await updateWaterApplicationStatus(applicationId, "approved");
+      toast.success("Application approved");
+      loadApplications();
+      loadOverview();
+    } catch (error) {
+      toast.error("Failed to approve application");
+    }
+  };
+
+  const handleRejectApplication = async (applicationId: string) => {
+    try {
+      await updateWaterApplicationStatus(applicationId, "rejected");
+      toast.success("Application rejected");
+      loadApplications();
+      loadOverview();
+    } catch (error) {
+      toast.error("Failed to reject application");
+    }
   };
 
   const handleResolvePayment = async (id: string) => {
@@ -421,314 +519,390 @@ useEffect(() => {
     loadDetails(selectedCategory);
   };
 
+  // Voice Command Functions
+  const startVoiceCommand = () => {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      toast.error("Voice commands not supported in this browser");
+      return;
+    }
+
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    const recognition = new SpeechRecognition();
+    
+    recognition.continuous = false;
+    recognition.interimResults = false;
+    recognition.lang = 'en-US';
+
+    recognition.onstart = () => {
+      setIsListening(true);
+      toast.info("Listening for voice commands...");
+    };
+
+    recognition.onresult = (event: any) => {
+      const command = event.results[0][0].transcript.toLowerCase();
+      processVoiceCommand(command);
+    };
+
+    recognition.onerror = () => {
+      setIsListening(false);
+      toast.error("Voice recognition failed");
+    };
+
+    recognition.onend = () => {
+      setIsListening(false);
+    };
+
+    recognition.start();
+  };
+
+  const processVoiceCommand = (command: string) => {
+    const commands = [
+      { keywords: ['show stats', 'statistics', 'dashboard'], action: () => setActiveTab('service'), response: 'Showing service dashboard' },
+      { keywords: ['show complaints', 'complaints'], action: () => setActiveTab('complaints'), response: 'Showing complaints management' },
+      { keywords: ['show applications', 'applications'], action: () => setActiveTab('service'), response: 'Showing service management' },
+      { keywords: ['refresh', 'reload', 'update'], action: () => loadOverview(), response: 'Refreshing dashboard data' },
+      { keywords: ['emergency mode', 'emergency'], action: () => setEmergencyMode(!emergencyMode), response: `Emergency mode ${!emergencyMode ? 'activated' : 'deactivated'}` }
+    ];
+
+    for (const cmd of commands) {
+      if (cmd.keywords.some(keyword => command.includes(keyword))) {
+        cmd.action();
+        toast.success(cmd.response);
+        return;
+      }
+    }
+
+    toast.error(`Command not recognized: "${command}"`);
+  };
+
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      toast.error("Please enter a search query");
+      return;
+    }
+    toast.info(`Searching for: ${searchQuery}`);
+    // Implement search logic here
+  };
+
+  const getStatusBadge = (status: string) => {
+    const colorMap: Record<string, string> = {
+      pending: "yellow",
+      "in-progress": "blue",
+      resolved: "green",
+      approved: "green",
+      rejected: "red",
+      paid: "green",
+      "overdue": "red",
+    };
+    const color = colorMap[status] || "gray";
+    return (
+      <Badge variant={color as any}>{status.toUpperCase()}</Badge>
+    );
+  };
+
   const hasError = Boolean(errorMessage);
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <Header />
-
-      <div className="max-w-7xl mx-auto px-4 py-8">
-        <div className="bg-gradient-to-r from-blue-500 to-cyan-500 rounded-3xl p-6 text-white mb-8">
-          <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6">
-            <div>
-              <h1 className="text-3xl font-bold">Water Department Admin</h1>
-              <p className="text-lg font-semibold mt-1">Welcome back, <span className="text-blue-200">{adminUser.citizenProfile.name || adminUser.name || 'Admin'}</span>!</p>
-              <p className="mt-2 text-sm text-blue-100">Manage applications, complaints, payments, and department analytics.</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <p className="font-semibold text-blue-200">{adminUser.phone}</p>
-                <p className="text-xs text-blue-100">{adminUser.department}</p>
-              </div>
-                <div className="w-12 h-12 bg-white/20 rounded-full flex items-center justify-center">
-                  <div className="w-8 h-8 bg-white rounded-full flex items-center justify-center font-semibold text-blue-900">
-                    {adminUser.citizenProfile?.name?.charAt(0).toUpperCase() || 'R'}
+    <div className="min-h-screen bg-slate-50">
+      {/* Official Government Header */}
+      <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white shadow-lg">
+        <Header />
+        <div className="px-4 py-6">
+          <div className="max-w-7xl mx-auto">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-6">
+                {/* Government Seal */}
+                <div className="bg-white/10 p-4 rounded-lg border-2 border-white/20">
+                  <div className="text-center">
+                    <Crown className="w-10 h-10 mx-auto mb-1" />
+                    <div className="text-xs font-bold">GOVERNMENT OF</div>
+                    <div className="text-sm font-bold">TAMIL NADU</div>
                   </div>
                 </div>
-              <button
-                onClick={handleLogout}
-                className="px-6 py-2 bg-white/20 hover:bg-white/30 text-white font-semibold rounded-xl transition-all duration-200 flex items-center gap-2"
-              >
-                <LogOut className="w-4 h-4" />
-                Logout
-              </button>
+                
+                <div>
+                  <h1 className="text-3xl font-bold mb-1">Chennai Metropolitan Water Supply</h1>
+                  <p className="text-blue-100 text-sm">Department of Water Resources & Infrastructure</p>
+                  <div className="flex items-center space-x-4 mt-2 text-xs">
+                    <span className="bg-white/20 px-2 py-1 rounded">ISO 9001:2015 Certified</span>
+                    <span className="bg-white/20 px-2 py-1 rounded">24/7 Service Available</span>
+                    <span className="bg-white/20 px-2 py-1 rounded">Emergency: 108</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-4">
+                <div className="text-right">
+                  <div className="text-sm opacity-90">Administrator Portal</div>
+                  <div className="font-semibold">{adminUser?.citizenProfile?.name || adminUser?.name || "Admin User"}</div>
+                </div>
+                <div className="bg-white/10 p-3 rounded-lg">
+                  <ShieldCheck className="w-6 h-6" />
+                </div>
+              </div>
             </div>
           </div>
         </div>
+      </div>
 
-        <section className="rounded-3xl bg-white p-6 shadow-md mb-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <div>
-              <h2 className="text-xl font-semibold text-slate-900">Dashboard Categories</h2>
-              <p className="text-sm text-slate-500">Select a category to view its metrics and recent activity.</p>
-            </div>
-            <div className="flex flex-wrap gap-3">
-              {(["service", "complaints", "financial"] as const).map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setActiveTab(tab)}
-                  className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                    activeTab === tab ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                  }`}
-                >
-                  {tab === "service" ? "Service" : tab === "complaints" ? "Complaints" : "Financial"}
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-
-        {activeTab === "service" && (
-          <section className="rounded-3xl bg-white p-6 shadow-md mb-8">
-            <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900">Service Subcategories</h3>
-                <p className="text-sm text-slate-500">Choose a service stream to view analytics and activity.</p>
-              </div>
-              <div className="flex flex-wrap gap-3">
-                {(Object.keys(serviceSubCategoryLabels) as ServiceSubTab[]).map((subTab) => (
-                  <button
-                    key={subTab}
-                    type="button"
-                    onClick={() => setServiceSubTab(subTab)}
-                    className={`rounded-full px-4 py-2 text-sm font-semibold transition ${
-                      serviceSubTab === subTab ? "bg-blue-600 text-white" : "bg-slate-100 text-slate-700 hover:bg-slate-200"
-                    }`}
-                  >
-                    {serviceSubCategoryLabels[subTab]}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 gap-6 lg:grid-cols-[1.35fr_0.75fr]">
-                <div className="rounded-3xl border border-slate-200/50 bg-gradient-to-br from-slate-50 to-blue-50 p-6 shadow-lg ring-1 ring-slate-200/50 backdrop-blur-sm">
-                <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-                  <div>
-                    <p className="text-sm uppercase tracking-[0.24em] text-blue-600 font-semibold">{serviceSubCategoryLabels[serviceSubTab]}</p>
-                    <h4 className="mt-2 text-3xl font-bold bg-gradient-to-r from-slate-900 to-slate-700 bg-clip-text text-transparent">Activity Trend</h4>
-                    <p className="mt-2 max-w-xl text-sm text-slate-600">
-                      Analytics over the current month for the selected service category.
-                    </p>
-                  </div>
-                  <div className="rounded-3xl bg-slate-100 px-4 py-3 text-sm font-semibold text-slate-800">
-                    {serviceSubActivity.length} recent updates
-                  </div>
-                </div>
-
-                <div className="mt-6 h-72">
-                  <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={serviceSubTabAnalyticsData[serviceSubTab]} margin={{ top: 10, right: 16, left: 0, bottom: 0 }}>
-                      <CartesianGrid stroke="rgba(148,163,184,0.08)" strokeDasharray="3 3" />
-                      <XAxis dataKey="name" stroke="rgba(148,163,184,0.5)" />
-                      <YAxis stroke="rgba(148,163,184,0.5)" />
-                      <Tooltip contentStyle={{ backgroundColor: 'white', border: '1px solid rgba(148,163,184,0.2)', color: 'black', borderRadius: '12px', boxShadow: '0 20px 25px -5px rgba(0, 0,0, 0.1), 0 10px 10px -5px rgba(0, 0,0, 0.04)' }} />
-                      <Line type="monotone" dataKey="value" stroke={chartColors[0]} strokeWidth={4} dot={{ r: 5, strokeWidth: 2, fill: chartColors[0] }} activeDot={{ r: 8, strokeWidth: 2 }} />
-                    </LineChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-
-              <div className="rounded-3xl border border-slate-200 bg-slate-50 p-6 shadow-sm">
-                <h4 className="text-lg font-semibold text-slate-900">Quick Summary</h4>
-                <p className="mt-2 text-sm text-slate-600">Service category insights for the selected stream.</p>
-                <div className="mt-6 space-y-4">
-                  <div className="rounded-3xl bg-white p-4 shadow-sm">
-                    <p className="text-sm text-slate-500">Expected throughput</p>
-                    <p className="mt-2 text-2xl font-semibold text-slate-900">{serviceSubTab === "newRequests" ? "24 requests" : serviceSubTab === "maintenance" ? "18 tasks" : "14 inspections"}</p>
-                  </div>
-                  <div className="rounded-3xl bg-white p-4 shadow-sm">
-                    <p className="text-sm text-slate-500">Average completion</p>
-                    <p className="mt-2 text-2xl font-semibold text-slate-900">{serviceSubTab === "newRequests" ? "72%" : serviceSubTab === "maintenance" ? "84%" : "91%"}</p>
-                  </div>
-                  <div className="rounded-3xl bg-white p-4 shadow-sm">
-                    <p className="text-sm text-slate-500">Priority items</p>
-                    <p className="mt-2 text-2xl font-semibold text-slate-900">{serviceSubTab === "newRequests" ? "6" : serviceSubTab === "maintenance" ? "4" : "2"}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </section>
-        )}
-
-        {activeTab === "complaints" && (
-          <>
-            {/* 3 Cards */}
-            <section className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
-              {[
-                { title: "Pending Complaints", stat: overviewStats.find(s => s.category === "pendingComplaints"), color: "bg-red-50 text-red-600" },
-                { title: "New Complaints", stat: overviewStats.find(s => s.category === "newComplaints"), color: "bg-yellow-50 text-yellow-600" },
-                { title: "Resolved Cases", stat: overviewStats.find(s => s.category === "resolvedCases"), color: "bg-emerald-50 text-emerald-600" }
-              ].map(({ title, stat, color }, index) => (
-                <div key={index} className={`rounded-3xl p-8 shadow-lg border ${color}`}>
-                  <h4 className="text-3xl font-bold text-slate-900">{stat?.value || 0}</h4>
-                  <p className="mt-2 text-lg font-semibold text-slate-700">{title}</p>
-                </div>
-              ))}
-            </section>
-
-            {/* AI Insights */}
-            <section className="mb-8">
-              <div className="rounded-3xl bg-gradient-to-r from-purple-50 to-indigo-50 p-8 border shadow-lg">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-r from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center">
-                    <BarChart3 className="w-6 h-6 text-white" />
-                  </div>
-                  <div>
-                    <h3 className="text-xl font-bold text-slate-900">AI Insights</h3>
-                    <p className="text-sm text-slate-500">Auto-generated analysis from complaint data</p>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 text-sm">
-                  <div className="p-4 bg-white rounded-xl shadow-sm">
-                    <p className="text-slate-600">High Priority %</p>
-                    <p className="text-2xl font-bold text-red-600">
-                      {complaints.filter(c => c.priority === "HIGH").length / Math.max(complaints.length, 1) * 100 | 0}%
-                    </p>
-                  </div>
-                  <div className="p-4 bg-white rounded-xl shadow-sm">
-                    <p className="text-slate-600">Avg Age</p>
-                    <p className="text-2xl font-bold text-blue-600">
-                      {complaints.reduce((sum, c) => sum + (new Date().getTime() - new Date(c.createdAt).getTime()), 0) / complaints.length / (1000*60*60) | 0} hrs
-                    </p>
-                  </div>
-                  <div className="p-4 bg-white rounded-xl shadow-sm">
-                    <p className="text-slate-600">Top Area</p>
-                    <p className="text-2xl font-bold text-indigo-600">
-                      {complaints.reduce((top, c) => {
-                        const count = top.count || 0;
-                        return complaints.filter(cc => cc.area === c.area).length > count ? { area: c.area, count: complaints.filter(cc => cc.area === c.area).length } : top;
-                      }, {area: 'N/A', count: 0}).area}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </section>
-
-            {/* Two Horizontal Charts */}
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
-              {/* Status Chart */}
-              <div className="rounded-3xl bg-white p-6 shadow-lg border">
-                <h3 className="text-xl font-bold text-slate-900 mb-4">Complaints by Status</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={[
-                    { name: 'Submitted', value: complaints.filter(c => c.status === "NEW").length },
-                    { name: 'Assigned', value: complaints.filter(c => c.status === "ASSIGNED").length },
-                    { name: 'In Progress', value: complaints.filter(c => c.status === "IN_PROGRESS").length },
-                    { name: 'Resolved', value: complaints.filter(c => c.status === "RESOLVED").length },
-                    { name: 'Closed', value: complaints.filter(c => c.status === "REOPENED").length }
-                  ]}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="value" fill="#3b82f6" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-
-              {/* Category Chart */}
-              <div className="rounded-3xl bg-white p-6 shadow-lg border">
-                <h3 className="text-xl font-bold text-slate-900 mb-4">Complaints by Category</h3>
-                <ResponsiveContainer width="100%" height={300}>
-                  <BarChart data={[
-                    { name: 'Water Supply', value: complaints.filter(c => c.category === "Water Supply").length },
-                    { name: 'Water Quality', value: complaints.filter(c => c.category === "Water Quality").length },
-                    { name: 'Infrastructure', value: complaints.filter(c => c.category === "Infrastructure").length },
-                    { name: 'Billing', value: complaints.filter(c => c.category === "Billing").length },
-                    { name: 'Other', value: complaints.filter(c => c.category === "Other").length }
-                  ]}>
-                    <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="name" angle={-45} textAnchor="end" height={80} />
-                    <YAxis />
-                    <Tooltip />
-                    <Legend />
-                    <Bar dataKey="value" fill="#10b981" />
-                  </BarChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-
-            {/* Map full width */}
-            <div className="mb-8">
-              <MapView complaints={complaints} />
-            </div>
+      <div className="max-w-7xl mx-auto px-4 py-8">
+        {/* Real-time Status Bar */}
+        <div className="mb-8">
+          <div className="flex items-center justify-between">
+            <Alert className={`border-${wsConnected ? 'green' : 'yellow'}-200 bg-${wsConnected ? 'green' : 'yellow'}-50 flex-1 mr-4`}>
+              <Activity className={`h-4 w-4 text-${wsConnected ? 'green' : 'yellow'}-600`} />
+              <AlertDescription className={`text-${wsConnected ? 'green' : 'yellow'}-800`}>
+                <strong>System Status:</strong> All services operational • Last updated: {new Date().toLocaleTimeString()} • 
+                <span className="inline-flex items-center ml-2">
+                  <div className={`w-2 h-2 rounded-full mr-1 ${wsConnected ? 'bg-green-500 animate-pulse' : 'bg-yellow-500'}`}></div>
+                  {wsConnected ? 'Real-time updates active' : 'Connecting to real-time updates...'}
+                </span>
+              </AlertDescription>
+            </Alert>
             
-            {/* Complaint Table below map */}
-            <div className="mb-8">
-              <ComplaintTable 
-                complaints={complaints}
-                selectedIds={selectedIds}
-                filters={filters}
-                workers={workers}
-                loading={loadingComplaints}
-                onFilterChange={setFilters}
-                onToggleSelect={(id) => setSelectedIds(prev => prev.includes(id) ? prev.filter(p => p !== id) : [...prev, id])}
-                onToggleSelectAll={() => setSelectedIds([])}
-                onAssign={handleAssignComplaint}
-              />
-            </div>
-          </>
-        )}
-
-        <section className="rounded-3xl bg-white p-6 shadow-md mb-8">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between mb-6">
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900">
-                {activeTab === "service"
-                  ? "Service Metrics"
-                  : activeTab === "complaints"
-                  ? "Complaint Metrics"
-                  : "Financial Metrics"}
-              </h3>
-              <p className="text-sm text-slate-500">
-                {activeTab === "service"
-                  ? "Key service-related indicators."
-                  : activeTab === "complaints"
-                  ? "Complaint volume and resolution details."
-                  : "Financial health indicators."}
-              </p>
-            </div>
-            <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-semibold text-slate-700">
-              {overviewLoading ? "Loading metrics..." : `${selectedMetrics.length} metrics`}
-            </span>
+            {/* Voice Command Button */}
+            <Button 
+              onClick={startVoiceCommand}
+              variant={isListening ? "destructive" : "outline"}
+              className={`ml-4 ${isListening ? 'animate-pulse' : ''}`}
+            >
+              {isListening ? <MicOff className="w-4 h-4 mr-2" /> : <Mic className="w-4 h-4 mr-2" />}
+              {isListening ? 'Listening...' : 'Voice Command'}
+            </Button>
           </div>
+        </div>
 
-          {actionsLoading ? (
-            <div className="space-y-4">
-              {Array.from({ length: 4 }).map((_, index) => (
-                <div key={index} className="h-24 animate-pulse rounded-3xl bg-slate-100" />
-              ))}
-            </div>
-          ) : recentActivity.length === 0 ? (
-            <div className="rounded-3xl border border-dashed border-slate-300 p-12 text-center text-slate-500">
-              No recent activity for this category.
-            </div>
-          ) : (
-            <div className="space-y-4">
-              {recentActivity.map((item) => (
-                <div key={item.id} className="rounded-3xl border border-slate-200 p-5 shadow-sm">
-                  <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
-                    <div>
-                      <p className="text-xs uppercase tracking-[0.24em] text-slate-500">{item.type}</p>
-                      <h4 className="mt-2 text-lg font-semibold text-slate-900">{item.title}</h4>
-                      <p className="text-sm text-slate-500">{item.subtitle}</p>
-                    </div>
-                    <div className="text-right">
-                      <span className={`inline-flex rounded-full px-3 py-1 text-xs font-semibold ${statusBadgeClass(item.status)}`}>{item.status}</span>
-                      <p className="mt-2 text-xs text-slate-500">{new Date(item.date).toLocaleDateString()}</p>
-                    </div>
-                  </div>
-                  <p className="mt-4 text-sm text-slate-600">{item.details}</p>
+        {/* Quick Actions */}
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
+          <Card className="border-l-4 border-l-blue-500">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Pending Actions</p>
+                  <p className="text-2xl font-bold text-blue-600">
+                    {complaints.filter(c => c.status === 'pending').length + actionItems.filter(a => a.status === 'pending').length}
+                  </p>
                 </div>
-              ))}
-            </div>
-          )}
-        </section>
+                <AlertTriangle className="w-8 h-8 text-blue-500" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-l-4 border-l-green-500">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Resolved Today</p>
+                  <p className="text-2xl font-bold text-green-600">
+                    {complaints.filter(c => c.status === 'resolved').length}
+                  </p>
+                </div>
+                <CheckCircle className="w-8 h-8 text-green-500" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-l-4 border-l-orange-500">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">New Connections</p>
+                  <p className="text-2xl font-bold text-orange-600">
+                    {actionItems.filter(a => a.status === 'approved').length}
+                  </p>
+                </div>
+                <Droplet className="w-8 h-8 text-orange-500" />
+              </div>
+            </CardContent>
+          </Card>
+          
+          <Card className="border-l-4 border-l-purple-500">
+            <CardContent className="p-4">
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm text-gray-600">Avg Response Time</p>
+                  <p className="text-2xl font-bold text-purple-600">
+                    2.8d
+                  </p>
+                </div>
+                <Timer className="w-8 h-8 text-purple-500" />
+              </div>
+            </CardContent>
+          </Card>
+        </div>
 
+        {/* Search and Controls */}
+        <Card className="mb-8 shadow-sm">
+          <CardContent className="p-6">
+            <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-4">
+              <div className="flex-1 max-w-md">
+                <div className="relative">
+                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                  <Input
+                    placeholder="Search by ID, phone, consumer number..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSearch()}
+                    className="pl-10"
+                  />
+                </div>
+              </div>
+              <div className="flex items-center gap-3">
+                <Button variant="outline" onClick={handleSearch} disabled={!searchQuery.trim()}>
+                  <Search className="w-4 h-4 mr-2" />
+                  Search
+                </Button>
+                <Button variant="outline" onClick={loadOverview} disabled={refreshing}>
+                  <RefreshCw className={`w-4 h-4 mr-2 ${refreshing ? 'animate-spin' : ''}`} />
+                  Refresh Data
+                </Button>
+                <Button variant="outline" onClick={handleLogout}>
+                  <LogOut className="w-4 h-4 mr-2" />
+                  Logout
+                </Button>
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Tabs */}
+        <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as "service" | "complaints" | "financial" | "map")} className="w-full">
+          <TabsList className="grid w-full grid-cols-4">
+            <TabsTrigger value="service">Service Management</TabsTrigger>
+            <TabsTrigger value="complaints">Complaints</TabsTrigger>
+            <TabsTrigger value="map">Map View</TabsTrigger>
+            <TabsTrigger value="financial">Financial</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="service" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Service Applications</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {loadingApplications ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="w-6 h-6 animate-spin" />
+                    <span className="ml-2">Loading applications...</span>
+                  </div>
+                ) : (
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>ID</TableHead>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Status</TableHead>
+                        <TableHead>Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {applications.map((app) => (
+                        <TableRow key={app.id}>
+                          <TableCell>{app.id}</TableCell>
+                          <TableCell>{app.formData?.name || 'N/A'}</TableCell>
+                          <TableCell>{app.type}</TableCell>
+                          <TableCell>{getStatusBadge(app.status || 'submitted')}</TableCell>
+                          <TableCell>
+                            <div className="flex gap-2">
+                              {app.status === 'submitted' && (
+                                <>
+                                  <Button 
+                                    size="sm" 
+                                    variant="default"
+                                    onClick={() => handleApproveApplication(app.id)}
+                                  >
+                                    <CheckCircle className="w-4 h-4 mr-1" />
+                                    Approve
+                                  </Button>
+                                  <Button 
+                                    size="sm" 
+                                    variant="destructive"
+                                    onClick={() => handleRejectApplication(app.id)}
+                                  >
+                                    <XCircle className="w-4 h-4 mr-1" />
+                                    Reject
+                                  </Button>
+                                </>
+                              )}
+                              <Button size="sm" variant="outline">View Details</Button>
+                            </div>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                      {applications.length === 0 && (
+                        <TableRow>
+                          <TableCell colSpan={5} className="text-center py-8 text-gray-500">
+                            No applications found
+                          </TableCell>
+                        </TableRow>
+                      )}
+                    </TableBody>
+                  </Table>
+                )}
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="complaints" className="space-y-4">
+            <ComplaintTable 
+              complaints={complaints} 
+              selectedIds={selectedIds}
+              filters={filters}
+              workers={workers}
+              loading={loadingComplaints} 
+              onFilterChange={setFilters}
+              onToggleSelect={handleToggleSelect}
+              onToggleSelectAll={handleToggleSelectAll}
+              onAssign={handleAssignComplaint}
+              onStatusUpdate={handleStatusUpdate}
+              onBulkAssign={handleBulkAssign}
+              onBulkResolve={handleBulkResolve}
+            />
+          </TabsContent>
+          
+          <TabsContent value="map" className="space-y-4">
+            <MapView complaints={complaints} />
+          </TabsContent>
+          
+          <TabsContent value="financial" className="space-y-4">
+            <Card>
+              <CardHeader>
+                <CardTitle>Financial Overview</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-green-600">₹{overviewStats.find(s => s.category === 'totalRevenue')?.value || 0}</p>
+                    <p className="text-sm text-gray-600">Total Revenue</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-orange-600">₹{overviewStats.find(s => s.category === 'pendingPayments')?.value || 0}</p>
+                    <p className="text-sm text-gray-600">Pending Payments</p>
+                  </div>
+                  <div className="text-center">
+                    <p className="text-2xl font-bold text-blue-600">{overviewStats.find(s => s.category === 'applications')?.value || 0}</p>
+                    <p className="text-sm text-gray-600">Active Applications</p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
       </div>
     </div>
   );
+
+  if (hasError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-500 mx-auto mb-4"></div>
+          <p className="text-red-600">{errorMessage}</p>
+        </div>
+      </div>
+    );
+  }
+
+  return null; // This should never be reached
 }

@@ -1,7 +1,8 @@
 import { useAuth } from "../../context/AuthContext";
 import { useEffect, useState, useCallback } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { Header } from "../../components/Header";
+import { MapView } from "../../components/admin/MapView";
 import { electricityApi } from "../../services/electricityApi";
 import { wsService } from "../../services/websocket";
 import { 
@@ -66,6 +67,8 @@ interface Complaint {
   consumerNumber?: string;
   type: string;
   description: string;
+  location: string;
+  photo?: string;
   status: "pending" | "in-progress" | "resolved";
   priority: "low" | "medium" | "high";
   assignedTo?: string;
@@ -598,12 +601,13 @@ export function ElectricityAdminDashboard() {
 
         {/* Tabs */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="grid w-full grid-cols-5">
+          <TabsList className="grid w-full grid-cols-6">
             <TabsTrigger value="stats">Overview</TabsTrigger>
             <TabsTrigger value="analytics">Analytics</TabsTrigger>
             <TabsTrigger value="complaints">Complaints</TabsTrigger>
             <TabsTrigger value="applications">Applications</TabsTrigger>
             <TabsTrigger value="bills">Billing</TabsTrigger>
+            <TabsTrigger value="map">Map View</TabsTrigger>
           </TabsList>
 
           {/* Analytics Tab */}
@@ -961,15 +965,16 @@ export function ElectricityAdminDashboard() {
               <CardContent className="p-0">
                 <Table>
                   <TableHeader>
-                    <TableRow className="bg-gray-50">
-                      <TableHead className="font-semibold">ID</TableHead>
-                      <TableHead className="font-semibold">Contact</TableHead>
-                      <TableHead className="font-semibold">Type</TableHead>
-                      <TableHead className="font-semibold">Status</TableHead>
-                      <TableHead className="font-semibold">Priority</TableHead>
-                      <TableHead className="font-semibold">Created</TableHead>
-                      <TableHead className="font-semibold">Actions</TableHead>
-                    </TableRow>
+                      <TableRow className="bg-gray-50">
+                        <TableHead className="font-semibold">ID</TableHead>
+                        <TableHead className="font-semibold">Contact</TableHead>
+                        <TableHead className="font-semibold">Type</TableHead>
+                        <TableHead className="font-semibold">Location</TableHead>
+                        <TableHead className="font-semibold">Status</TableHead>
+                        <TableHead className="font-semibold">Priority</TableHead>
+                        <TableHead className="font-semibold">Created</TableHead>
+                        <TableHead className="font-semibold">Actions</TableHead>
+                      </TableRow>
                   </TableHeader>
                   <TableBody>
                     {complaints.map((complaint) => (
@@ -989,6 +994,16 @@ export function ElectricityAdminDashboard() {
                           <Badge variant="outline" className="bg-blue-50 text-blue-700">
                             {complaint.type}
                           </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="text-sm max-w-xs truncate">
+                            <div className="font-medium">{complaint.location}</div>
+                            {complaint.photo && (
+                              <span className="text-xs text-blue-600 hover:underline cursor-pointer">
+                                📷 Photo
+                              </span>
+                            )}
+                          </div>
                         </TableCell>
                         <TableCell>{getStatusBadge(complaint.status)}</TableCell>
                         <TableCell>
@@ -1325,6 +1340,11 @@ export function ElectricityAdminDashboard() {
                 </Table>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          {/* Map View Tab */}
+          <TabsContent value="map" className="mt-6">
+            <MapView complaints={complaints} />
           </TabsContent>
         </Tabs>
       </div>

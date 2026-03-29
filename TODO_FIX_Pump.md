@@ -1,0 +1,1 @@
+- [x] 1. Edit import: Remove Pump from lucide-react destructuring

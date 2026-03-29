@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { Header } from "../../components/Header";
 import { AIChatbot } from "../../components/AIChatbot";
-import { Link, useSearchParams } from "react-router";
+import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Upload, CheckCircle2, MapPin } from "lucide-react";
 import { toast } from "sonner";
 import { saveMunicipalComplaint, type MunicipalComplaint } from "../../../backend/municipalComplaintService";

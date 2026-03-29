@@ -36,6 +36,7 @@ export interface ElectricityComplaint {
   assignedTo?: string;
   resolvedDate?: string;
   createdAt: string;
+  coordinates: { lat: number; lng: number };
 }
 
 export interface TimelineStep {
@@ -195,6 +196,7 @@ let electricityComplaints: ElectricityComplaint[] = [
     priority: "high",
     assignedTo: "Technician Ram",
     createdAt: "2026-03-22",
+    coordinates: { lat: 13.0827, lng: 80.2707 },
   },
 
   {
@@ -207,6 +209,7 @@ let electricityComplaints: ElectricityComplaint[] = [
     priority: "medium",
     resolvedDate: "2026-03-12",
     createdAt: "2026-03-10",
+    coordinates: { lat: 13.0827, lng: 80.2707 },
   },
   // More...
 ];
@@ -350,7 +353,7 @@ export const payBill = async (billId: string, paymentData: { method: string; amo
   };
 };
 
-export const createComplaint = async (complaintData: Omit<ElectricityComplaint, 'id' | 'createdAt'>): Promise<AuthResponse> => {
+export const createComplaint = async (complaintData: Omit<ElectricityComplaint, 'id' | 'createdAt' | 'coordinates'>): Promise<AuthResponse> => {
   await simulateDelay();
   const complaint: ElectricityComplaint = {
     ...complaintData,
@@ -358,6 +361,7 @@ export const createComplaint = async (complaintData: Omit<ElectricityComplaint, 
     createdAt: new Date().toISOString(),
     status: "pending",
     priority: "medium",
+    coordinates: { lat: 13.0827 + (Math.random() - 0.5) * 0.1, lng: 80.2707 + (Math.random() - 0.5) * 0.1 }, // Random around Chennai
   };
   electricityComplaints.push(complaint);
   return { success: true, message: "Complaint created", data: complaint };

@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { Header } from "../../components/Header";
 import { AIChatbot } from "../../components/AIChatbot";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Search, CreditCard, Download, CheckCircle2, AlertCircle, Smartphone, Landmark, History, Calendar, IndianRupee, Mic, MicOff, Zap, TrendingUp, TrendingDown, Leaf, Clock, Bell, Shield, Calculator, BarChart3, PieChart, Activity, Phone, MapPin, Users, Award, Target, Lightbulb, DollarSign, CalendarDays, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
 
@@ -244,8 +243,6 @@ export function BillPayment() {
           </div>
         </div>
 
-        <Header showAuth={true} />
-
         <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
@@ -367,10 +364,8 @@ export function BillPayment() {
         </div>
       </div>
 
-      <Header showAuth={true} />
-
       {/* Real-time Status Bar */}
-      <div className="bg-white border-b border-gray-200 shadow-sm">
+      <div className="bg-white border-b border-gray-200 shadow-sm"> 
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-6">

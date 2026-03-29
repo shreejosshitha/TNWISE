@@ -3,13 +3,13 @@ import { CircleMarker, MapContainer, Popup, TileLayer } from "react-leaflet";
 import type { AdminComplaint } from "../../../backend/adminApi";
 
 interface MapViewProps {
-  complaints: AdminComplaint[];
+  complaints: (AdminComplaint | any)[];
 }
 
 const markerColor = (priority: string, status: string) => {
-  if (status === "RESOLVED") return "#34d399";
-  if (priority === "HIGH") return "#f43f5e";
-  if (priority === "MEDIUM") return "#f59e0b";
+  if (status === "RESOLVED" || status === "resolved") return "#34d399";
+  if (priority === "HIGH" || priority === "high") return "#f43f5e";
+  if (priority === "MEDIUM" || priority === "medium") return "#f59e0b";
   return "#22c55e";
 };
 
@@ -20,7 +20,9 @@ const heatColor = (count: number) => {
 };
 
 export function MapView({ complaints }: MapViewProps) {
-  const center = complaints.length ? [complaints[0].coordinates.lat, complaints[0].coordinates.lng] : [13.0358, 80.2440];
+  // Filter complaints that have coordinates
+  const validComplaints = complaints.filter(c => c.coordinates && c.coordinates.lat && c.coordinates.lng);
+  const center = validComplaints.length ? [validComplaints[0].coordinates.lat, validComplaints[0].coordinates.lng] : [13.0358, 80.2440];
 
   const heatClusters = complaints.reduce<Record<string, { lat: number; lng: number; count: number }>>((acc, complaint) => {
     const latKey = Math.round(complaint.coordinates.lat * 100) / 100;
@@ -60,19 +62,19 @@ export function MapView({ complaints }: MapViewProps) {
               }}
             />
           ))}
-          {complaints.map((complaint) => (
+          {validComplaints.map((complaint) => (
             <CircleMarker
-              key={complaint._id}
+              key={complaint.id || complaint._id}
               center={[complaint.coordinates.lat, complaint.coordinates.lng]}
               radius={8}
               pathOptions={{ color: markerColor(complaint.priority, complaint.status), fillColor: markerColor(complaint.priority, complaint.status), fillOpacity: 0.8 }}
             >
               <Popup>
                 <div className="space-y-1 text-sm">
-                  <p className="font-semibold text-slate-900">{complaint.complaintId}</p>
+                  <p className="font-semibold text-slate-900">{complaint.id || complaint.complaintId}</p>
                   <p>{complaint.type}</p>
-                  <p>{complaint.location}</p>
-                  <p className="text-xs text-slate-500">Status: {complaint.status.replace("_", " ")}</p>
+                  <p>{complaint.location || complaint.description}</p>
+                  <p className="text-xs text-slate-500">Status: {complaint.status.replace("_", " ").toLowerCase()}</p>
                 </div>
               </Popup>
             </CircleMarker>

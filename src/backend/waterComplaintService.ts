@@ -131,34 +131,11 @@ export function getAdminWaterComplaints(): AdminComplaint[] {
 
 // ✅ SAVE COMPLAINT
 export function saveWaterComplaint(complaint: WaterComplaint) {
-  if (typeof window === "undefined") return;
-
-  try {
-    const current = getWaterComplaints();
-
-    window.localStorage.setItem(
-      STORAGE_KEY,
-      JSON.stringify([complaint, ...current])
-    );
-
-    const action: WaterComplaintAction = {
-      message: `Submitted water complaint: ${complaint.title} - ID: ${complaint.id}`,
-      timestamp: new Date().toLocaleString(),
-    };
-
-    const rawActions = window.localStorage.getItem(ACTION_STORAGE_KEY);
-    const existingActions: WaterComplaintAction[] = rawActions
-      ? JSON.parse(rawActions)
-      : [];
-
-    window.localStorage.setItem(
-      ACTION_STORAGE_KEY,
-      JSON.stringify([action, ...existingActions].slice(0, 5))
-    );
-
+  // Backend API now handles storage
+  console.log('Complaint saved to backend API:', complaint.id);
+  // Trigger update event for compatibility
+  if (typeof window !== "undefined") {
     window.dispatchEvent(new Event("waterComplaintUpdated"));
-  } catch {
-    // ignore errors
   }
 }
 

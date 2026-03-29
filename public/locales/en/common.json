@@ -1,0 +1,14 @@
+{
+  "header": {
+    "title": "Govt of Tamil Nadu",
+    "subtitle": "Public Kiosk Portal",
+    "start": "START",
+    "notifications": "Notifications",
+    "profile": "Profile",
+    "logout": "Logout"
+  },
+  "language": {
+    "en": "தமிழ்",
+    "ta": "ENGLISH"
+  }
+}

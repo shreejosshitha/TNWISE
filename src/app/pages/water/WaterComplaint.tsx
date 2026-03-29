@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
-import { Header } from "../../components/Header";
 import { AIChatbot } from "../../components/AIChatbot";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { ArrowLeft, CheckCircle2, Upload, X, FileText, Eye, Copy, Download, MapPin, Camera } from "lucide-react";
 import { toast } from "sonner";
 import { saveWaterComplaint, WaterComplaint as StoredWaterComplaint, StoredProofFile } from "../../../backend/waterComplaintService";

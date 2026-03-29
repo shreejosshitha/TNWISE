@@ -1,6 +1,5 @@
-import { Header } from "../../components/Header";
 import { AIChatbot } from "../../components/AIChatbot";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { ArrowLeft, FileText, AlertCircle, Clock, CheckCircle, XCircle, Wrench } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -148,8 +147,7 @@ export function WaterTracking() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      <Header showAuth={true} />
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"> 
         <Link to="/water" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6">
           <ArrowLeft className="w-5 h-5" />
           Back to Water Services

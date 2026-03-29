@@ -283,71 +283,66 @@ function buildDateKey(date: Date): string {
 }
 
 export async function fetchWaterDashboardStats(): Promise<WaterDashboardStat[]> {
-  const applications = readStorage(APPLICATION_STORAGE_KEY, defaultApplications);
-  const complaints = readStorage(COMPLAINT_STORAGE_KEY, defaultComplaints);
-  const payments = readStorage(PAYMENT_STORAGE_KEY, defaultPayments);
-
-  const totalApplications = applications.length;
-  const pendingComplaints = complaints.filter((item) => item.status === "submitted").length;
-  const newComplaints = complaints.filter((item) => item.status === "submitted").length;
-  const resolvedCases = complaints.filter((item) => item.status === "resolved" || item.status === "closed").length;
-  const pendingPayments = payments.filter((payment) => payment.status === "pending").length;
-  const overduePayments = payments.filter((payment) => payment.status === "overdue").length;
-  const overdueAlerts = overduePayments + complaints.filter((item) => item.status === "submitted").length;
-  const totalRevenue = payments.reduce((sum, payment) => sum + (payment.status === "paid" ? payment.amount : 0), 0);
-
-  const stats: WaterDashboardStat[] = [
-    {
-      label: "Applications",
-      value: totalApplications,
-      category: "applications",
-      trend: totalApplications > 10 ? 18 : 6,
-      trendDirection: "up",
-      path: "/admin/water",
-    },
-    {
-      label: "Pending Complaints",
-      value: pendingComplaints,
-      category: "pendingComplaints",
-      trend: pendingComplaints > 2 ? 6 : 2,
-      trendDirection: pendingComplaints > 2 ? "up" : "down",
-      path: "/admin/water",
-    },
-    {
-      label: "New Complaints",
-      value: newComplaints,
-      category: "newComplaints",
-      trend: newComplaints > 1 ? 10 : 4,
-      trendDirection: newComplaints > 1 ? "up" : "down",
-      path: "/admin/water",
-    },
-    {
-      label: "Resolved Cases",
-      value: resolvedCases,
-      category: "resolvedCases",
-      trend: resolvedCases > 2 ? 14 : 8,
-      trendDirection: "up",
-      path: "/admin/water",
-    },
-    {
-      label: "Total Revenue",
-      value: totalRevenue,
-      category: "totalRevenue",
-      trend: totalRevenue > 2000 ? 12 : 5,
-      trendDirection: "up",
-      path: "/admin/water",
-    },
-    {
-      label: "Pending Payments",
-      value: pendingPayments,
-      category: "pendingPayments",
-      trend: pendingPayments > 0 ? 9 : 3,
-      trendDirection: pendingPayments > 0 ? "up" : "down",
-      path: "/admin/water",
-    },
-    {
-      label: "Overdue Alerts",
-      value: overdueAlerts,
+  try {
+    const response = await fetch('http://localhost:4000/api/analytics');
+    if (!response.ok) {
+      throw new Error('Failed to fetch analytics');
+    }
+    const analytics = await response.json();
+    
+    // Transform analytics data to dashboard stats
+    const stats: WaterDashboardStat[] = [
+      {
+        label: "Applications",
+        value: 25, // Placeholder - would need applications API
+        category: "applications",
+        trend: 18,
+        trendDirection: "up",
+        path: "/admin/water",
+      },
+      {
+        label: "Pending Complaints",
+        value: analytics.widgets.unassignedCount,
+        category: "pendingComplaints",
+        trend: analytics.widgets.unassignedCount > 2 ? 6 : 2,
+        trendDirection: analytics.widgets.unassignedCount > 2 ? "up" : "down",
+        path: "/admin/water",
+      },
+      {
+        label: "New Complaints",
+        value: analytics.widgets.unassignedCount,
+        category: "newComplaints",
+        trend: analytics.widgets.unassignedCount > 1 ? 10 : 4,
+        trendDirection: analytics.widgets.unassignedCount > 1 ? "up" : "down",
+        path: "/admin/water",
+      },
+      {
+        label: "Resolved Cases",
+        value: analytics.widgets.resolvedCount,
+        category: "resolvedCases",
+        trend: analytics.widgets.resolvedCount > 2 ? 14 : 8,
+        trendDirection: "up",
+        path: "/admin/water",
+      },
+      {
+        label: "Total Revenue",
+        value: 15000, // Placeholder
+        category: "totalRevenue",
+        trend: 12,
+        trendDirection: "up",
+        path: "/admin/water",
+      },
+      {
+        label: "Pending Payments",
+        value: 5, // Placeholder
+        category: "pendingPayments",
+        trend: 9,
+        trendDirection: "up",
+        path: "/admin/water",
+      },
+      {
+        label: "Overdue Alerts",
+        value: analytics.widgets.overdueCount,
       category: "overdueAlerts",
       trend: overdueAlerts > 1 ? 16 : 7,
       trendDirection: overdueAlerts > 1 ? "up" : "down",
@@ -584,6 +579,40 @@ export async function resolveWaterPayment(id: string): Promise<boolean> {
   saveStorage(PAYMENT_STORAGE_KEY, updated);
   dispatchDashboardUpdate();
   return simulateBackendDelay(true);
+}
+
+// ✅ UPDATE COMPLAINT STATUS
+export async function updateWaterComplaintStatus(
+  complaintId: string,
+  status: string
+): Promise<boolean> {
+  const complaints = readStorage(COMPLAINT_STORAGE_KEY, defaultComplaints);
+  const updatedComplaints = complaints.map(complaint =>
+    complaint.id === complaintId ? { ...complaint, status } : complaint
+  );
+  saveStorage(COMPLAINT_STORAGE_KEY, updatedComplaints);
+  dispatchDashboardUpdate();
+  return simulateBackendDelay(true);
+}
+
+// ✅ UPDATE APPLICATION STATUS
+export async function updateWaterApplicationStatus(
+  applicationId: string,
+  status: string
+): Promise<boolean> {
+  const applications = readStorage(APPLICATION_STORAGE_KEY, defaultApplications);
+  const updatedApplications = applications.map(app =>
+    app.id === applicationId ? { ...app, status } : app
+  );
+  saveStorage(APPLICATION_STORAGE_KEY, updatedApplications);
+  dispatchDashboardUpdate();
+  return simulateBackendDelay(true);
+}
+
+// ✅ FETCH APPLICATIONS
+export async function fetchWaterApplications(): Promise<any[]> {
+  const applications = readStorage(APPLICATION_STORAGE_KEY, defaultApplications);
+  return simulateBackendDelay(applications);
 }
 
 import type { AdminComplaint, ComplaintFilters } from "./adminApi";

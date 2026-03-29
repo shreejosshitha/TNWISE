@@ -1,6 +1,5 @@
-import { Header } from "../../components/Header";
 import { AIChatbot } from "../../components/AIChatbot";
-import { Link, useParams } from "react-router";
+import { Link, useParams } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { electricityApi } from "../../services/electricityApi";
 import { Loader2 } from "lucide-react";
@@ -67,9 +66,8 @@ export function TransparencyTracker() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      <Header showAuth={true} />
 
-      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8"> 
         <Link
           to="/electricity/tracking"
           className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6"

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import Complaint from "../models/Complaint.js";
+import { waterComplaints } from "../data/dummyData.js";
 
 const router = Router();
 
@@ -27,8 +27,8 @@ function buildTrend(complaints) {
   }));
 }
 
-router.get("/", async (req, res) => {
-  const complaints = await Complaint.find().lean();
+router.get("/", (req, res) => {
+  const complaints = [...waterComplaints];
   const total = complaints.length;
   const resolved = complaints.filter((complaint) => complaint.status === "RESOLVED").length;
   const highPriority = complaints.filter((complaint) => complaint.priority === "HIGH").length;

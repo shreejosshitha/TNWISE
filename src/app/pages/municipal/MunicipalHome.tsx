@@ -1,12 +1,10 @@
-import { Header } from "../../components/Header";
 import { AIChatbot } from "../../components/AIChatbot";
-import { Link } from "react-router";
+import { Link } from "react-router-dom";
 import { Trash2, Lightbulb, Construction, CreditCard, Search, ArrowLeft, Building2 } from "lucide-react";
 
 export function MunicipalHome() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      <Header showAuth={true} />
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link

@@ -1,10 +1,10 @@
 import { Router } from "express";
-import Complaint from "../models/Complaint.js";
+import { waterComplaints } from "../data/dummyData.js";
 
 const router = Router();
 
-router.get("/", async (req, res) => {
-  const complaints = await Complaint.find().lean();
+router.get("/", (req, res) => {
+  const complaints = [...waterComplaints];
 
   const wardCounts = complaints.reduce((acc, complaint) => {
     acc[complaint.ward] = (acc[complaint.ward] || 0) + 1;
@@ -58,7 +58,7 @@ router.get("/", async (req, res) => {
     {
       id: "insight-4",
       title: "Average resolution time",
-      value: `${avgResolution} hrs",
+      value: `${avgResolution} hrs`,
       description: "Typical time spent resolving closed complaints.",
     },
   ];

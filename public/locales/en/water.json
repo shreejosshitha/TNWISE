@@ -1,0 +1,39 @@
+{
+  "home": {
+    "title": "Chennai Water Board",
+    "subtitle": "Department of Water Supply & Sewerage"
+  },
+  "cards": {
+    "payTax": "Pay Water Tax",
+    "payTaxDesc": "Pay your water tax quickly and securely",
+    "newConnection": "New Connection",
+    "newConnectionDesc": "Apply for a new water connection",
+    "raiseComplaint": "Raise Complaint",
+    "raiseComplaintDesc": "Report leakage or supply issues",
+    "trackStatus": "Track Status",
+    "trackStatusDesc": "Check your applications and complaints",
+    "waterCalculator": "Water Calculator",
+    "waterCalculatorDesc": "Calculate water usage and savings",
+    "transparency": "Transparency",
+    "transparencyDesc": "Track transaction transparency",
+    "continue": "Continue →",
+    "applyNow": "Apply Now →",
+    "reportIssue": "Report Issue →",
+    "trackNow": "Track Now →",
+    "calculate": "Calculate →",
+    "viewRecords": "View Records →"
+  },
+  "stats": {
+    "totalProperties": "Total Properties",
+    "activeConnections": "Active Connections",
+    "avgResponseTime": "Avg Response Time",
+    "satisfactionScore": "Satisfaction Score"
+  },
+  "voice": {
+    "title": "Voice Command Guide",
+    "commands": "Water Commands",
+    "emergency": "Emergency",
+    "shortcuts": "Keyboard Shortcuts"
+  },
+  "recent": "Recent Actions"
+}

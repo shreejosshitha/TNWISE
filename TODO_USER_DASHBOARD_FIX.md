@@ -1,0 +1,1 @@
+# Fix UserDashboard JSX Error\n\n## Steps:\n1. ✅ Create this TODO file\n2. Edit src/app/pages/UserDashboard.tsx: Remove extra closing </div> after Departments section (line ~228)\n3. Remove extra closing </section> near file end before AIChatbot\n4. Verify JSX compiles, test page\n5. Mark complete and remove TODO

@@ -8,13 +8,29 @@ class WebSocketService {
   connect() {
     if (this.socket?.connected) return;
 
-    this.socket = io('http://localhost:3001', {
+    const backendPort = import.meta.env.VITE_BACKEND_PORT || '3001';
+    let socketUrl = '/'; // Prefer proxy
+    
+    // Fallback to direct if env set
+    if (backendPort !== '3001') {
+      socketUrl = `http://localhost:${backendPort}`;
+    }
+
+    this.socket = io(socketUrl, {
       transports: ['websocket', 'polling'],
-      timeout: 20000,
+      timeout: 30000,
+      forceNew: true,
+      reconnection: true,
+      reconnectionAttempts: 10,
+      reconnectionDelay: 1000,
+      reconnectionDelayMax: 5000,
     });
 
-    this.socket.on('connect', () => {
-      console.log('🔴 Connected to WebSocket server');
+    console.log(`🔄 Connecting to WebSocket: ${socketUrl}`);
+
+
+  this.socket.on('connect', () => {
+      console.log('🟢 Connected to WebSocket server');
       this.reconnectAttempts = 0;
     });
 

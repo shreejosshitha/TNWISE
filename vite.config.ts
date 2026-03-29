@@ -16,6 +16,23 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  server: {
+    proxy: {
+      '/api': {
+        target: `http://localhost:${process.env.VITE_BACKEND_PORT || '3003'}`,
+        changeOrigin: true,
+        secure: false,
+        rewrite: (path) => path.replace(/^\/api/, '/api'),
+      },
+      '/socket.io': {
+        target: `http://localhost:${process.env.VITE_BACKEND_PORT || '3003'}`,
+        ws: true,
+        changeOrigin: true,
+        secure: false,
+      },
+    },
+  },
+
 
   // File types to support raw imports. Never add .css, .tsx, or .ts files to this.
   assetsInclude: ['**/*.svg', '**/*.csv'],
