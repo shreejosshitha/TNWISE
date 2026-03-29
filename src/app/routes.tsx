@@ -26,6 +26,7 @@ import { ElectricityAdminDashboard } from "./pages/admin/ElectricityAdminDashboa
 import { WaterAdminDashboard } from "./pages/admin/WaterAdminDashboard";
 import { MunicipalAdminDashboard } from "./pages/admin/MunicipalAdminDashboard";
 import { TransportAdminDashboard } from "./pages/admin/TransportAdminDashboard";
+import { MunicipalComplaintDetails } from "./pages/admin/MunicipalComplaintDetails";
 import { ProtectedRoute, AdminProtectedRoute } from "./components/ProtectedRoute";
 
 // Wrapper components for protected routes
@@ -179,6 +180,14 @@ export const router = createBrowserRouter([
     Component: ProtectedMunicipalAdminDashboard,
   },
   {
+    path: "/admin/municipal-complaint/:id",
+    Component: () => (
+      <AdminProtectedRoute department="municipal">
+        <MunicipalComplaintDetails />
+      </AdminProtectedRoute>
+    ),
+  },
+  {
     path: "/admin/transport",
     Component: ProtectedTransportAdminDashboard,
   },
@@ -187,3 +196,4 @@ export const router = createBrowserRouter([
     Component: NotFound,
   },
 ]);
+

@@ -30,22 +30,23 @@ export function MunicipalHome() {
         </div>
 
         <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+          
           <Link
-            to="/municipal/property-tax"
+            to="/municipal/complaint?type=road"
             className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 group"
           >
-            <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <CreditCard className="w-7 h-7 text-blue-600" />
+            <div className="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <Construction className="w-7 h-7 text-red-600" />
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Property Tax</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Road Damage</h3>
             <p className="text-gray-600 mb-4">
-              Pay your property tax online
+              Report potholes and road damage
             </p>
             <div className="pt-4 border-t border-gray-200">
-              <span className="text-blue-600 font-medium text-sm">Pay Now →</span>
+              <span className="text-blue-600 font-medium text-sm">Report →</span>
             </div>
           </Link>
-
+          
           <Link
             to="/municipal/complaint?type=garbage"
             className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 group"
@@ -59,6 +60,22 @@ export function MunicipalHome() {
             </p>
             <div className="pt-4 border-t border-gray-200">
               <span className="text-blue-600 font-medium text-sm">Report →</span>
+            </div>
+          </Link>
+
+          <Link
+            to="/municipal/property-tax"
+            className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 group"
+          >
+            <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+              <CreditCard className="w-7 h-7 text-blue-600" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">Property Tax</h3>
+            <p className="text-gray-600 mb-4">
+              Pay your property tax online
+            </p>
+            <div className="pt-4 border-t border-gray-200">
+              <span className="text-blue-600 font-medium text-sm">Pay Now →</span>
             </div>
           </Link>
 
@@ -78,21 +95,6 @@ export function MunicipalHome() {
             </div>
           </Link>
 
-          <Link
-            to="/municipal/complaint?type=road"
-            className="bg-white rounded-2xl p-6 shadow-lg hover:shadow-xl transition-all hover:-translate-y-1 group"
-          >
-            <div className="w-14 h-14 bg-red-100 rounded-xl flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
-              <Construction className="w-7 h-7 text-red-600" />
-            </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Road Damage</h3>
-            <p className="text-gray-600 mb-4">
-              Report potholes and road damage
-            </p>
-            <div className="pt-4 border-t border-gray-200">
-              <span className="text-blue-600 font-medium text-sm">Report →</span>
-            </div>
-          </Link>
 
           <Link
             to="/municipal/complaint"

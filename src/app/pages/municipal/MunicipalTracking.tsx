@@ -1,35 +1,97 @@
+import { useState, useEffect } from "react";
 import { Header } from "../../components/Header";
 import { AIChatbot } from "../../components/AIChatbot";
 import { Link } from "react-router";
-import { ArrowLeft, AlertCircle, Clock, CheckCircle2 } from "lucide-react";
+import { ArrowLeft, AlertCircle, Clock, CheckCircle2, Copy } from "lucide-react";
+import { toast } from "sonner";
+import { getMunicipalComplaints, MunicipalComplaint, getComplaintStatus } from "../../../backend/municipalComplaintService";
+
+interface StatusConfig {
+  label: string;
+  color: string;
+  Icon: React.ComponentType<{ className?: string }>;
+}
+
+const getStatusConfig = (status: MunicipalComplaint['status']): StatusConfig => {
+  switch (status) {
+    case 'submitted':
+      return { label: "Submitted", color: "blue", Icon: AlertCircle };
+    case 'assigned':
+      return { label: "Assigned", color: "yellow", Icon: Clock };
+    case 'in_progress':
+      return { label: "In Progress", color: "yellow", Icon: Clock };
+    case 'resolved':
+    case 'closed':
+      return { label: "Resolved", color: "green", Icon: CheckCircle2 };
+    default:
+      return { label: status, color: "gray", Icon: AlertCircle };
+  }
+};
+
+const getStatusColorClass = (status: MunicipalComplaint['status']): string => {
+  switch (status) {
+    case 'submitted': return "blue";
+    case 'assigned':
+    case 'in_progress': return "yellow";
+    case 'resolved':
+    case 'closed': return "green";
+    default: return "gray";
+  }
+};
 
 export function MunicipalTracking() {
-  const complaints = [
-    {
-      id: "MUN1710752400000",
-      type: "Streetlight Not Working",
-      location: "Anna Nagar Main Road",
-      status: "In Progress",
-      date: "2026-03-21",
-      statusColor: "yellow",
-    },
-    {
-      id: "MUN1710666000000",
-      type: "Garbage Collection",
-      location: "T. Nagar, 5th Street",
-      status: "Resolved",
-      date: "2026-03-15",
-      statusColor: "green",
-    },
-    {
-      id: "MUN1710580000000",
-      type: "Road Damage",
-      location: "Adyar Main Road",
-      status: "Under Review",
-      date: "2026-03-10",
-      statusColor: "blue",
-    },
-  ];
+  const [complaints, setComplaints] = useState<MunicipalComplaint[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const loadComplaints = () => {
+      try {
+        const data = getMunicipalComplaints();
+        const recent = data.map(c => ({
+          ...c,
+          status: getComplaintStatus(c.id)
+        })).filter(c => {
+          const date = new Date(c.date);
+          const thirtyDaysAgo = new Date();
+          thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
+          return date > thirtyDaysAgo;
+        }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+        setComplaints(recent);
+      } catch {
+        setComplaints([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadComplaints();
+    const handleUpdate = () => loadComplaints();
+    window.addEventListener("municipalComplaintUpdated", handleUpdate);
+    return () => window.removeEventListener("municipalComplaintUpdated", handleUpdate);
+  }, []);
+
+  const copyId = (id: string) => {
+    navigator.clipboard.writeText(id).then(() => {
+      toast.success("Complaint ID copied!");
+    }).catch(() => {
+      toast.error("Failed to copy ID");
+    });
+  };
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
+        <Header showAuth={true} />
+        <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+          <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
+            <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your complaints...</p>
+          </div>
+        </div>
+        <AIChatbot />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
@@ -40,85 +102,110 @@ export function MunicipalTracking() {
           Back to Municipal Services
         </Link>
         <div className="bg-white rounded-2xl shadow-xl p-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-8">Track Your Complaints</h2>
+          <h2 className="text-2xl font-bold text-gray-900 mb-8 flex items-center gap-2">
+            Track Your Complaints ({complaints.length})
+          </h2>
           
-          <div className="space-y-4">
-            {complaints.map((complaint) => (
-              <div
-                key={complaint.id}
-                className={`p-6 bg-gradient-to-r rounded-xl border-2 ${
-                  complaint.statusColor === "yellow"
-                    ? "from-yellow-50 to-white border-yellow-100"
-                    : complaint.statusColor === "green"
-                    ? "from-green-50 to-white border-green-100"
-                    : "from-blue-50 to-white border-blue-100"
-                }`}
+          {complaints.length === 0 ? (
+            <div className="text-center py-16">
+              <AlertCircle className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-xl font-semibold text-gray-900 mb-2">No complaints found</h3>
+              <p className="text-gray-600 mb-6">All your recent complaints will appear here</p>
+              <Link
+                to="/municipal"
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold transition-colors"
               >
-                <div className="flex items-start justify-between mb-3">
-                  <div className="flex-1">
-                    <div className="flex items-start gap-3">
-                      <AlertCircle
-                        className={`w-6 h-6 flex-shrink-0 mt-1 ${
-                          complaint.statusColor === "yellow"
-                            ? "text-yellow-600"
-                            : complaint.statusColor === "green"
-                            ? "text-green-600"
-                            : "text-blue-600"
-                        }`}
-                      />
-                      <div>
-                        <h4 className="font-semibold text-gray-900 text-lg">{complaint.type}</h4>
-                        <p className="text-sm text-gray-600 mt-1">📍 {complaint.location}</p>
-                        <p className="text-sm text-gray-600">Complaint ID: {complaint.id}</p>
-                        <p className="text-sm text-gray-600">Registered on {complaint.date}</p>
+                Submit New Complaint
+              </Link>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {complaints.map((complaint) => {
+                const statusConfig = getStatusConfig(complaint.status);
+                const statusColor = getStatusColorClass(complaint.status);
+                const fullType = complaint.subcategory 
+                  ? `${complaint.category} - ${complaint.subcategory}` 
+                  : complaint.category;
+                const displayTitle = complaint.title || fullType;
+
+                return (
+                  <div
+                    key={complaint.id}
+                    className={`p-6 rounded-xl border-2 hover:shadow-lg transition-all ${
+                      statusColor === "yellow"
+                        ? "bg-gradient-to-r from-yellow-50 to-yellow-25 border-yellow-200"
+                        : statusColor === "green"
+                        ? "bg-gradient-to-r from-green-50 to-green-25 border-green-200"
+                        : "bg-gradient-to-r from-blue-50 to-blue-25 border-blue-200"
+                    }`}
+                  >
+                    <div className="flex flex-col lg:flex-row lg:items-start lg:justify-between gap-4">
+                      <div className="flex-1 lg:flex lg:items-start gap-3">
+                        <statusConfig.Icon
+                          className={`w-8 h-8 flex-shrink-0 mt-1 text-${statusConfig.color}-600`}
+                        />
+                        <div className="min-w-0 flex-1">
+                          <h4 className="font-bold text-gray-900 text-lg mb-1 line-clamp-2">{displayTitle}</h4>
+                          <p className="text-sm text-gray-600 mb-2">📍 {complaint.location}</p>
+                          
+                          <div className="flex flex-wrap items-center gap-2 mb-2">
+                            <span className="text-xs font-mono bg-gray-100 text-gray-800 px-3 py-1 rounded-full">
+                              {complaint.id}
+                            </span>
+                            <button
+                              onClick={() => copyId(complaint.id)}
+                              className="p-1.5 hover:bg-gray-200 rounded-lg transition-colors text-gray-600 hover:text-gray-900"
+                              title="Copy ID"
+                            >
+                              <Copy className="w-4 h-4" />
+                            </button>
+                            {complaint.image && (
+                              <span className="text-xs bg-blue-100 text-blue-800 px-2.5 py-1 rounded-full">
+                                📷 Photo
+                              </span>
+                            )}
+                            <span className="text-xs bg-gray-100 text-gray-700 px-2.5 py-1 rounded-full">
+                              {complaint.mode}
+                            </span>
+                          </div>
+                          
+                          <p className="text-sm text-gray-500 mb-1">
+                            Submitted: {new Date(complaint.date).toLocaleDateString()}
+                          </p>
+                          {complaint.subcategory && (
+                            <p className="text-xs text-gray-500">Subcategory: {complaint.subcategory}</p>
+                          )}
+                          
+                          <p className="text-sm text-gray-700 mt-2 line-clamp-3">
+                            {complaint.description}
+                          </p>
+                        </div>
+                      </div>
+                      
+                      <div className="flex-shrink-0 ml-auto">
+                        <div
+                          className={`px-4 py-2 rounded-full font-semibold text-sm flex items-center gap-2 ${
+                            statusColor === "yellow"
+                              ? "bg-yellow-100 text-yellow-800 border-yellow-200"
+                              : statusColor === "green"
+                              ? "bg-green-100 text-green-800 border-green-200"
+                              : "bg-blue-100 text-blue-800 border-blue-200"
+                          } border`}
+                        >
+                          <statusConfig.Icon className={`w-4 h-4 flex-shrink-0`} />
+                          {statusConfig.label}
+                        </div>
                       </div>
                     </div>
                   </div>
-                  <div
-                    className={`px-4 py-2 rounded-full font-semibold text-sm flex items-center gap-2 ${
-                      complaint.statusColor === "yellow"
-                        ? "bg-yellow-100 text-yellow-700"
-                        : complaint.statusColor === "green"
-                        ? "bg-green-100 text-green-700"
-                        : "bg-blue-100 text-blue-700"
-                    }`}
-                  >
-                    {complaint.statusColor === "yellow" && <Clock className="w-4 h-4" />}
-                    {complaint.statusColor === "green" && <CheckCircle2 className="w-4 h-4" />}
-                    {complaint.status}
-                  </div>
-                </div>
-
-                {complaint.statusColor === "yellow" && (
-                  <div className="mt-4 pt-4 border-t border-yellow-200">
-                    <p className="text-sm text-gray-700">
-                      <strong>Status Update:</strong> Our team has been assigned to your complaint. 
-                      Work is scheduled to begin within 2-3 working days.
-                    </p>
-                  </div>
-                )}
-
-                {complaint.statusColor === "green" && (
-                  <div className="mt-4 pt-4 border-t border-green-200">
-                    <p className="text-sm text-green-800">
-                      ✓ Complaint resolved successfully. Thank you for reporting!
-                    </p>
-                  </div>
-                )}
-
-                {complaint.statusColor === "blue" && (
-                  <div className="mt-4 pt-4 border-t border-blue-200">
-                    <p className="text-sm text-gray-700">
-                      <strong>Status Update:</strong> Your complaint is being reviewed by our team.
-                    </p>
-                  </div>
-                )}
-              </div>
-            ))}
-          </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       </div>
       <AIChatbot />
     </div>
   );
 }
+
