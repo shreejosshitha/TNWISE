@@ -1,28 +1,37 @@
-# ✅ Fix Water Citizen 404 Issue - COMPLETE
+# Remove Duplicate Headers - Progress Tracker
 
-**Status:** ✅ COMPLETE
+## Plan Overview
+Remove redundant page-specific `<Header />` imports/renders from citizen and admin pages. Keep single Header from RootLayout.tsx.
 
-## Analysis
-- Error: `Cannot destructure property 'basename' of context as it is null` in Link
-- Cause: Wrong import `from "react-router"` instead of `"react-router-dom"` in water pages
-- Effect: Link fails -> component throws -> ErrorBoundary -> NotFound (404)
-- Electricity works (correct imports)
+## Steps (0/21 complete)
 
-## Steps
+### Phase 1: Key Admin Pages (0/4)
+- [x] 1. src/app/pages/admin/ElectricityAdminDashboard.tsx (remove import + <Header />)
+- [x] 2. src/app/pages/admin/MunicipalAdminDashboard.tsx (remove import + <Header />)
+- [x] 3. src/app/pages/admin/WaterAdminDashboard.tsx (remove <Header /> render)
+- [x] 4. src/app/pages/UserDashboard.tsx (remove import + <Header />)
 
-### 1. [DONE] Created this TODO.md
-### 2. Fix imports in all src/app/pages/water/*.tsx files
-  - Find: `import .* from "react-router"`
-  - Replace: `from "react-router-dom"`
-### 3. Test navigation
-  - Visit /water
-  - Click 'Pay Water Tax' -> /water/bill-payment
-  - Click 'Raise Complaint' -> /water/complaint
-  - Check console for errors
-### 4. Verify other water pages (new-connection, tracking, calculator, transparency)
-### 5. Check auth flow (localStorage 'authUser') - optional protection restore
-### 6. [ ] Complete - attempt_completion
+### Phase 2: Municipal Pages (4/4) ✅
 
-**Quick test command:** Open browser dev console, navigate to water page, check if error gone.
-**Run:** `npm run dev` if not running.
+- [x] 5. src/app/pages/municipal/MunicipalHome.tsx
+- [x] 6. src/app/pages/municipal/MunicipalComplaint.tsx  
+- [x] 7. src/app/pages/municipal/MunicipalTracking.tsx
+- [x] 8. src/app/pages/municipal/PropertyTax.tsx
+
+### Phase 3: Water & Electricity Subpages (0/8)
+- [ ] 9-12. src/app/pages/water/* (.tsx files with Header)
+- [ ] 13-16. src/app/pages/electricity/* (.tsx files with Header)
+
+### Phase 4: Other Pages (0/5)
+- [ ] 17. src/app/pages/admin/AdminProfile.tsx
+- [ ] 18. src/app/pages/admin/MunicipalComplaintDetails.tsx
+- [ ] 19. src/app/pages/ProfilePage.tsx
+- [ ] 20. Others from search (AdminDashboard, etc.)
+
+### Phase 5: Verification (0/3)
+- [ ] 21. Test: `npm run dev`, check single Header, nav works
+- [ ] 22. Lint: `npm run lint` 
+- [ ] 23. Complete task
+
+**Next:** Edit ElectricityAdminDashboard.tsx (visible file)
 

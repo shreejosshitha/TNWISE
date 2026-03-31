@@ -14,8 +14,10 @@ import {
   Calendar,
   IndianRupee,
 } from "lucide-react";
+import { useTranslation } from "react-i18next";
 
 export function TransparencyTracker() {
+  const { t } = useTranslation('electricity');
   const { id } = useParams();
   const [appData, setAppData] = useState(null);
   const [loading, setLoading] = useState(true);

@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AIChatbot } from "../../components/AIChatbot";
+
 import { Link } from "react-router-dom";
 import { 
   ArrowLeft, 
@@ -128,14 +129,14 @@ export function PropertyTax() {
   };
 
   if (paymentSuccess) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
-        <Header showAuth={true} />
-        <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-          <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-10 text-center border border-green-200">
-            <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
-              <CheckCircle2 className="w-12 h-12 text-white" />
-            </div>
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-green-50 via-white to-emerald-50">
+
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <div className="bg-white/80 backdrop-blur-sm rounded-3xl shadow-2xl p-10 text-center border border-green-200">
+          <div className="w-24 h-24 bg-gradient-to-br from-green-400 to-emerald-500 rounded-2xl flex items-center justify-center mx-auto mb-8 shadow-lg">
+            <CheckCircle2 className="w-12 h-12 text-white" />
+          </div>
             <h1 className="text-4xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent mb-4">
               Payment Successful!
             </h1>
@@ -180,7 +181,6 @@ export function PropertyTax() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-indigo-50">
-      <Header showAuth={true} />
       <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link to="/municipal" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6">
           <ArrowLeft className="w-5 h-5" />

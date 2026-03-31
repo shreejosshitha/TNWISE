@@ -12,7 +12,7 @@ i18n
     fallbackLng: 'en',
     lng: 'en', // default
     supportedLngs: ['en', 'ta'],
-    ns: ['common', 'landing', 'water'],
+    ns: ['common', 'landing', 'water', 'electricity'],
     defaultNS: 'common',
     debug: true, // remove in prod
     interpolation: {

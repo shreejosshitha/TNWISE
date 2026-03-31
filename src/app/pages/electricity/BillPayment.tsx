@@ -3,6 +3,7 @@ import { AIChatbot } from "../../components/AIChatbot";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, Search, CreditCard, Download, CheckCircle2, AlertCircle, Smartphone, Landmark, History, Calendar, IndianRupee, Mic, MicOff, Zap, TrendingUp, TrendingDown, Leaf, Clock, Bell, Shield, Calculator, BarChart3, PieChart, Activity, Phone, MapPin, Users, Award, Target, Lightbulb, DollarSign, CalendarDays, AlertTriangle, CheckCircle, XCircle } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 // Mock payment history data
 const PAYMENT_HISTORY = [
@@ -15,6 +16,7 @@ const PAYMENT_HISTORY = [
 ];
 
 export function BillPayment() {
+  const { t } = useTranslation('electricity');
   const [consumerNumber, setConsumerNumber] = useState("");
   const [billData, setBillData] = useState<any>(null);
   const [paymentSuccess, setPaymentSuccess] = useState(false);
@@ -248,9 +250,9 @@ export function BillPayment() {
             <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-6">
               <CheckCircle2 className="w-10 h-10 text-green-600" />
             </div>
-            <h2 className="text-3xl font-bold text-gray-900 mb-4">Payment Successful! 🎉</h2>
+            <h2 className="text-3xl font-bold text-gray-900 mb-4">{t('billPayment.paymentSuccessful')}</h2>
             <p className="text-gray-600 mb-8">
-              Your electricity bill has been paid successfully
+              {t('billPayment.paymentSuccessDesc')}
             </p>
 
             <div className="bg-gray-50 rounded-xl p-6 mb-8 text-left space-y-4">
@@ -310,7 +312,7 @@ export function BillPayment() {
                 className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-semibold flex items-center justify-center gap-2 transition-colors"
               >
                 <Download className="w-5 h-5" />
-                Download Receipt
+                {t('billPayment.downloadReceipt')}
               </button>
               <button
                 onClick={() => {
@@ -321,7 +323,7 @@ export function BillPayment() {
                 }}
                 className="px-6 py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg font-semibold transition-colors"
               >
-                Pay Another Bill
+                {t('billPayment.payAnotherBill')}
               </button>
               <Link
                 to="/dashboard"

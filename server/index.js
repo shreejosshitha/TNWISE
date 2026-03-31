@@ -8,6 +8,8 @@ import electricityComplaintsRoutes from "./routes/electricityComplaints.js";
 import electricityConnectionsRoutes from "./routes/electricityConnections.js";
 import analyticsRoutes from "./routes/analytics.js";
 import insightsRoutes from "./routes/insights.js";
+import tamilSpeechRoutes from "./routes/tamilSpeech.js";
+import translationRoutes from "./routes/translation.js";
 
 dotenv.config();
 
@@ -23,6 +25,9 @@ app.use("/api/electricity/complaints", electricityComplaintsRoutes);
 app.use("/api/electricity/connections", electricityConnectionsRoutes);
 app.use("/api/analytics", analyticsRoutes);
 app.use("/api/insights", insightsRoutes);
+app.use("/api/speech-to-text", tamilSpeechRoutes);
+
+app.use("/api/translate", translationRoutes);
 
 app.get("/", (req, res) => {
   res.json({ status: "TN Wise API - Dummy Data (No MongoDB) running" });

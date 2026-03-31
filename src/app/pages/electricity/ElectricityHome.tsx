@@ -10,6 +10,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
@@ -17,6 +18,7 @@ import { Progress } from "../../components/ui/progress";
 import { Alert, AlertDescription } from "../../components/ui/alert";
 
 export function ElectricityHome() {
+  const { t } = useTranslation('electricity');
   const [isListening, setIsListening] = useState(false);
   const [currentTime, setCurrentTime] = useState(new Date());
   const [continuousMode, setContinuousMode] = useState(false);
@@ -348,26 +350,26 @@ export function ElectricityHome() {
                 <div className="bg-white/10 p-4 rounded-lg border-2 border-white/20">
                   <div className="text-center">
                     <Crown className="w-10 h-10 mx-auto mb-1" />
-                    <div className="text-xs font-bold">GOVERNMENT OF</div>
-                    <div className="text-sm font-bold">TAMIL NADU</div>
+                    <div className="text-xs font-bold">{t('home.governmentOf')}</div>
+                    <div className="text-sm font-bold">{t('home.tamilNadu')}</div>
                   </div>
                 </div>
                 
                 <div>
-                  <h1 className="text-3xl font-bold mb-1">Tamil Nadu Electricity Board</h1>
-                  <p className="text-blue-100 text-sm">Department of Energy & Infrastructure</p>
+                  <h1 className="text-3xl font-bold mb-1">{t('home.title')}</h1>
+                  <p className="text-blue-100 text-sm">{t('home.subtitle')}</p>
                   <div className="flex items-center space-x-4 mt-2 text-xs">
-                    <span className="bg-white/20 px-2 py-1 rounded">ISO 9001:2015 Certified</span>
-                    <span className="bg-white/20 px-2 py-1 rounded">24/7 Service Available</span>
-                    <span className="bg-white/20 px-2 py-1 rounded">Emergency: 1912</span>
+                    <span className="bg-white/20 px-2 py-1 rounded">{t('home.isoCertified')}</span>
+                    <span className="bg-white/20 px-2 py-1 rounded">{t('home.serviceAvailable')}</span>
+                    <span className="bg-white/20 px-2 py-1 rounded">{t('home.emergency')}</span>
                   </div>
                 </div>
               </div>
               
               <div className="flex items-center space-x-4">
                 <div className="text-right">
-                  <div className="text-sm opacity-90">Citizen Portal</div>
-                  <div className="font-semibold">Welcome to TANGEDCO</div>
+                  <div className="text-sm opacity-90">{t('home.citizenPortal')}</div>
+                  <div className="font-semibold">{t('home.welcome')}</div>
                 </div>
                 <div className="bg-white/10 p-3 rounded-lg">
                   <Shield className="w-6 h-6" />
@@ -437,7 +439,7 @@ export function ElectricityHome() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Total Users</p>
+                  <p className="text-sm text-gray-600">{t('stats.totalUsers')}</p>
                   <p className="text-2xl font-bold text-blue-600">{serviceStats.totalUsers.toLocaleString()}</p>
                 </div>
                 <Users className="w-8 h-8 text-blue-500" />
@@ -449,7 +451,7 @@ export function ElectricityHome() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Active Connections</p>
+                  <p className="text-sm text-gray-600">{t('stats.activeConnections')}</p>
                   <p className="text-2xl font-bold text-green-600">{serviceStats.activeConnections.toLocaleString()}</p>
                 </div>
                 <Zap className="w-8 h-8 text-green-500" />
@@ -461,7 +463,7 @@ export function ElectricityHome() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Avg Response Time</p>
+                  <p className="text-sm text-gray-600">{t('stats.avgResponseTime')}</p>
                   <p className="text-2xl font-bold text-orange-600">{serviceStats.avgResponseTime}</p>
                 </div>
                 <Clock className="w-8 h-8 text-orange-500" />
@@ -473,7 +475,7 @@ export function ElectricityHome() {
             <CardContent className="p-4">
               <div className="flex items-center justify-between">
                 <div>
-                  <p className="text-sm text-gray-600">Satisfaction Score</p>
+                  <p className="text-sm text-gray-600">{t('stats.satisfactionScore')}</p>
                   <div className="flex items-center gap-1">
                     <p className="text-2xl font-bold text-purple-600">{serviceStats.satisfactionScore}</p>
                     <Star className="w-5 h-5 text-yellow-500 fill-current" />
@@ -506,12 +508,12 @@ export function ElectricityHome() {
               </div>
               <Badge variant="secondary" className="bg-blue-100 text-blue-700">Most Used</Badge>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Pay Electricity Bill</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('cards.payBill')}</h3>
             <p className="text-gray-600 mb-4">
-              Pay your electricity bill quickly and securely with multiple payment options
+              {t('cards.payBillDesc')}
             </p>
             <div className="flex items-center justify-between">
-              <span className="text-blue-600 font-medium text-sm">Pay Now →</span>
+              <span className="text-blue-600 font-medium text-sm">{t('cards.payNow')}</span>
               <div className="flex gap-1">
                 <Smartphone className="w-4 h-4 text-gray-400" />
                 <Landmark className="w-4 h-4 text-gray-400" />
@@ -530,12 +532,12 @@ export function ElectricityHome() {
               </div>
               <Badge variant="secondary" className="bg-green-100 text-green-700">New</Badge>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">New Connection</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('cards.newConnection')}</h3>
             <p className="text-gray-600 mb-4">
-              Apply for a new electricity connection with online tracking and instant approval
+              {t('cards.newConnectionDesc')}
             </p>
             <div className="flex items-center justify-between">
-              <span className="text-green-600 font-medium text-sm">Apply Now →</span>
+              <span className="text-green-600 font-medium text-sm">{t('cards.applyNow')}</span>
               <div className="flex gap-1">
                 <CheckCircle className="w-4 h-4 text-gray-400" />
                 <Eye className="w-4 h-4 text-gray-400" />
@@ -553,12 +555,12 @@ export function ElectricityHome() {
               </div>
               <Badge variant="secondary" className="bg-red-100 text-red-700">Priority</Badge>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Raise Complaint</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('cards.raiseComplaint')}</h3>
             <p className="text-gray-600 mb-4">
-              Report power outages, billing issues, or service problems with real-time updates
+              {t('cards.raiseComplaintDesc')}
             </p>
             <div className="flex items-center justify-between">
-              <span className="text-red-600 font-medium text-sm">Report Issue →</span>
+              <span className="text-red-600 font-medium text-sm">{t('cards.reportIssue')}</span>
               <div className="flex gap-1">
                 <AlertTriangle className="w-4 h-4 text-gray-400" />
                 <Bell className="w-4 h-4 text-gray-400" />
@@ -576,12 +578,12 @@ export function ElectricityHome() {
               </div>
               <Badge variant="secondary" className="bg-purple-100 text-purple-700">Track</Badge>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Track Applications</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('cards.trackStatus')}</h3>
             <p className="text-gray-600 mb-4">
-              Monitor your connection applications, complaints, and bill payments in real-time
+              {t('cards.trackStatusDesc')}
             </p>
             <div className="flex items-center justify-between">
-              <span className="text-purple-600 font-medium text-sm">Track Now →</span>
+              <span className="text-purple-600 font-medium text-sm">{t('cards.trackNow')}</span>
               <div className="flex gap-1">
                 <Activity className="w-4 h-4 text-gray-400" />
                 <MapPin className="w-4 h-4 text-gray-400" />
@@ -599,12 +601,12 @@ export function ElectricityHome() {
               </div>
               <Badge variant="secondary" className="bg-indigo-100 text-indigo-700">Secure</Badge>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Transparency Tracker</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('cards.transparencyTracker')}</h3>
             <p className="text-gray-600 mb-4">
-              View blockchain-verified transaction history and service transparency
+              {t('cards.transparencyTrackerDesc')}
             </p>
             <div className="flex items-center justify-between">
-              <span className="text-indigo-600 font-medium text-sm">View Records →</span>
+              <span className="text-indigo-600 font-medium text-sm">{t('cards.viewRecords')}</span>
               <div className="flex gap-1">
                 <Shield className="w-4 h-4 text-gray-400" />
                 <Lock className="w-4 h-4 text-gray-400" />
@@ -619,14 +621,14 @@ export function ElectricityHome() {
               </div>
               <Badge variant="secondary" className="bg-orange-100 text-orange-700">Free Tool</Badge>
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-2">Energy Calculator</h3>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">{t('cards.energyCalculator')}</h3>
             <p className="text-gray-600 mb-4">
-              Calculate your electricity consumption and get personalized energy-saving tips
+              {t('cards.energyCalculatorDesc')}
             </p>
             <Link to="/electricity/calculator" className="block">
               <Button className="w-full bg-orange-600 hover:bg-orange-700">
                 <Calculator className="w-4 h-4 mr-2" />
-                Calculate Now
+                {t('cards.calculateNow')}
               </Button>
             </Link>
           </div>
@@ -638,15 +640,15 @@ export function ElectricityHome() {
             <CardHeader className="bg-red-50">
               <CardTitle className="flex items-center gap-2 text-red-700">
                 <AlertTriangle className="w-5 h-5" />
-                Emergency Services
+                {t('emergency.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="p-6">
               <div className="space-y-4">
                 <div className="flex items-center justify-between p-3 bg-red-50 rounded-lg">
                   <div>
-                    <p className="font-medium text-red-900">Power Outage</p>
-                    <p className="text-sm text-red-700">Report immediate power failure</p>
+                    <p className="font-medium text-red-900">{t('emergency.powerOutage')}</p>
+                    <p className="text-sm text-red-700">{t('emergency.powerOutageDesc')}</p>
                   </div>
                   <Button size="sm" variant="destructive">
                     <Phone className="w-4 h-4 mr-1" />
@@ -706,7 +708,7 @@ export function ElectricityHome() {
                   onClick={() => toast.info("AI assistant coming soon!")}
                 >
                   <Bot className="w-4 h-4 mr-2" />
-                  Ask AI Assistant
+                  {t('aiAssistant.askAI')}
                 </Button>
               </div>
             </CardContent>
@@ -718,10 +720,10 @@ export function ElectricityHome() {
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
               <Mic className="w-5 h-5" />
-              Voice Command Guide
+              {t('voice.title')}
               {commandHistory.length > 0 && (
                 <Badge variant="secondary" className="ml-auto">
-                  {commandHistory.length} recent commands
+                  {commandHistory.length} {t('voice.recentCommands')}
                 </Badge>
               )}
               <div className="flex items-center gap-2 ml-2">
@@ -729,13 +731,13 @@ export function ElectricityHome() {
                   variant={browserSupport.speechRecognition ? "default" : "destructive"} 
                   className="text-xs"
                 >
-                  🎤 {browserSupport.speechRecognition ? 'Recognition' : 'No Recognition'}
+                  🎤 {browserSupport.speechRecognition ? t('voice.recognition') : t('voice.noRecognition')}
                 </Badge>
                 <Badge 
                   variant={browserSupport.speechSynthesis ? "default" : "secondary"} 
                   className="text-xs"
                 >
-                  🔊 {browserSupport.speechSynthesis ? 'Speech' : 'No Speech'}
+                  🔊 {browserSupport.speechSynthesis ? t('voice.speech') : t('voice.noSpeech')}
                 </Badge>
               </div>
             </CardTitle>
@@ -743,7 +745,7 @@ export function ElectricityHome() {
           <CardContent>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div>
-                <h4 className="font-semibold mb-3 text-blue-900">🧭 Navigation Commands</h4>
+                <h4 className="font-semibold mb-3 text-blue-900">🧭 {t('voice.navigation')}</h4>
                 <ul className="text-sm space-y-2">
                   <li className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
@@ -773,7 +775,7 @@ export function ElectricityHome() {
               </div>
               
               <div>
-                <h4 className="font-semibold mb-3 text-green-900">⚡ Utility & Emergency Commands</h4>
+                <h4 className="font-semibold mb-3 text-green-900">⚡ {t('voice.utilities')}</h4>
                 <ul className="text-sm space-y-2">
                   <li className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-gray-500 rounded-full"></span>

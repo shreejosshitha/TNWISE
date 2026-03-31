@@ -606,7 +606,7 @@ useEffect(() => {
     <div className="min-h-screen bg-slate-50">
       {/* Official Government Header */}
       <div className="bg-gradient-to-r from-blue-900 via-blue-800 to-indigo-900 text-white shadow-lg">
-        <Header />
+
         <div className="px-4 py-6">
           <div className="max-w-7xl mx-auto">
             <div className="flex items-center justify-between">

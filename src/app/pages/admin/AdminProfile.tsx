@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useAuth } from "../../context/AuthContext";
-import { Header } from "../../components/Header";
+
 import { AIChatbot } from "../../components/AIChatbot";
 import { Link, useNavigate } from "react-router-dom";
 import { 
@@ -76,7 +76,7 @@ export function AdminProfilePage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-50 via-white to-indigo-50">
-      <Header />
+
       
       <div className="max-w-6xl mx-auto px-4 py-12">
         <Link to="/admin/MunicipalAdminDashboard" className="inline-flex items-center gap-3 mb-8 text-indigo-600 hover:text-indigo-700 font-medium">

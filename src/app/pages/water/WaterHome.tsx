@@ -69,7 +69,7 @@ export function WaterHome() {
       
       rec.continuous = false;
       rec.interimResults = false;
-      rec.lang = 'en-US';
+      rec.lang = 'en-IN'; // Support both English and Tamil
       
       rec.onstart = () => {
         setIsListening(true);
@@ -174,49 +174,60 @@ export function WaterHome() {
     console.log('Water voice command:', command);
 
     // Emergency commands (water-specific)
-    if (command.includes('emergency') || command.includes('leak') || command.includes('leakage') || command.includes('no water')) {
+    if (command.includes('emergency') || command.includes('leak') || command.includes('leakage') || command.includes('no water') ||
+        command.includes('அவசரம்') || command.includes('கசிவு') || command.includes('தண்ணீர் இல்லை') ||
+        command.includes('leak aachu') || command.includes('water leak') || command.includes('thanni illa') ||
+        command.includes('water emergency') || command.includes('pipe burst') || command.includes('water problem') ||
+        command.includes('no water supply') || command.includes('water outage') ||
+        command.includes('தண்ணீர் அவசரம்') || command.includes('குழாய் வெடித்தது') || command.includes('தண்ணீர் சிக்கல்') ||
+        command.includes('தண்ணீர் வழங்கல் இல்லை') || command.includes('தண்ணீர் துண்டிப்பு')) {
       toast.error("🚨 Water emergency detected! Calling leakage helpline...");
       window.open('tel:108', '_blank'); // Mock water emergency
-      speakResponse("Emergency services contacted for water leakage. Help is on the way.");
+      speakResponse("தண்ணீர் கசிவுக்கு அவசர சேவை தொடர்பு கொள்ளப்பட்டது. உதவி வந்துகொண்டிருக்கிறது.");
       return;
     }
 
-    if (command.includes('contamination') || command.includes('dirty water') || command.includes('bad water')) {
+    if (command.includes('contamination') || command.includes('dirty water') || command.includes('bad water') ||
+        command.includes('மாசு') || command.includes('அழுக்கு தண்ணீர்') ||
+        command.includes('water contamination') || command.includes('bad water quality') ||
+        command.includes('polluted water') || command.includes('unsafe water') || command.includes('water not clean') ||
+        command.includes('தண்ணீர் மாசு') || command.includes('கெட்ட தண்ணீர்') || command.includes('தண்ணீர் தரம் கெட்டது') ||
+        command.includes('மாசு தண்ணீர்') || command.includes('பாதுகாப்பில்லாத தண்ணீர்') || command.includes('தண்ணீர் சுத்தமாக இல்லை')) {
       toast.error("🚨 Water quality emergency! Calling 1913...");
       window.open('tel:1913', '_blank'); // Mock contamination
-      speakResponse("Water quality team alerted. Do not use contaminated water.");
+      speakResponse("தண்ணீர் தர குழு எச்சரிக்கப்பட்டது. மாசு தண்ணீரை பயன்படுத்த வேண்டாம்.");
       return;
     }
 
     // Navigation commands (water-specific)
     const navigationCommands = [
       { 
-        keywords: ['pay tax', 'bill payment', 'pay water', 'water tax'], 
+        keywords: ['pay tax', 'bill payment', 'pay water', 'water tax', 'தண்ணீர் கட்டணம்', 'கட்டணம் செலுத்து', 'tax pay pannu', 'water bill pay pannu', 'pay water bill', 'water payment', 'settle water bill'], 
         action: () => window.location.href = '/water/bill-payment', 
         response: 'Opening water tax payment' 
       },
       { 
-        keywords: ['new connection', 'apply connection'], 
+        keywords: ['new connection', 'apply connection', 'புதிய இணைப்பு', 'இணைப்பு விண்ணப்பிக்க', 'new connection apply pannu', 'connection podu', 'apply for new connection', 'get new water connection', 'new water service', 'request water connection'], 
         action: () => window.location.href = '/water/new-connection', 
         response: 'Opening new connection application' 
       },
       { 
-        keywords: ['complaint', 'leak complaint', 'no water', 'low pressure'], 
+        keywords: ['complaint', 'leak complaint', 'no water', 'low pressure', 'புகார்', 'கசிவு புகார்', 'தண்ணீர் இல்லை', 'குறைந்த அழுத்தம்', 'complaint podu', 'leak complaint pannu', 'water problem', 'file water complaint', 'report water issue', 'water complaint'], 
         action: () => window.location.href = '/water/complaint', 
         response: 'Opening complaint registration' 
       },
       { 
-        keywords: ['track', 'status'], 
+        keywords: ['track', 'status', 'கண்காணி', 'நிலை', 'track pannu', 'status check pannu', 'check my application status', 'track my water application', 'see water status', 'water application tracking'], 
         action: () => window.location.href = '/water/tracking', 
         response: 'Opening status tracking' 
       },
       { 
-        keywords: ['calculator', 'water calculator'], 
+        keywords: ['calculator', 'water calculator', 'கணக்கிடு', 'தண்ணீர் கணக்கிடு', 'calculator open pannu', 'water calculate pannu', 'water usage calculator', 'calculate water usage', 'water bill calculator'], 
         action: () => window.location.href = '/water/calculator', 
         response: 'Opening water calculator' 
       },
       { 
-        keywords: ['transparency'], 
+        keywords: ['transparency', 'வெளிப்படைத்தன்மை', 'transparency check pannu', 'view water transactions', 'water transaction history', 'water payment records'], 
         action: () => window.location.href = '/water/transparency', 
         response: 'Opening transparency tracker' 
       }
@@ -224,10 +235,10 @@ export function WaterHome() {
 
     // Utility commands
     const utilityCommands = [
-      { keywords: ['help'], action: () => showHelp(), response: 'Showing available voice commands' },
-      { keywords: ['stop listening', 'stop'], action: () => stopVoiceCommand(), response: 'Stopping voice recognition' },
-      { keywords: ['continuous mode'], action: () => toggleContinuousMode(), response: continuousMode ? 'Disabling continuous mode' : 'Enabling continuous mode' },
-      { keywords: ['status'], action: () => { speakResponse("Water supply stable. Quality tests passed."); toast.success("Water system status: All services operational"); }, response: 'Checking system status' },
+      { keywords: ['help', 'உதவி', 'help pannu', 'what can you do', 'show commands', 'available commands', 'how to use', 'tell me what you can do'], action: () => showHelp(), response: 'Showing available voice commands' },
+      { keywords: ['stop listening', 'stop', 'கேட்பதை நிறுத்து', 'நிறுத்து', 'stop pannu', 'stop voice', 'end listening', 'quit listening'], action: () => stopVoiceCommand(), response: 'Stopping voice recognition' },
+      { keywords: ['continuous mode', 'தொடர்ந்து முறை', 'continuous mode on pannu', 'always listen', 'keep listening on', 'continuous listening'], action: () => toggleContinuousMode(), response: continuousMode ? 'Disabling continuous mode' : 'Enabling continuous mode' },
+      { keywords: ['status', 'நிலை', 'status check pannu', 'check system status', 'water system status', 'current status'], action: () => { speakResponse("தண்ணீர் வழங்கல் நிலையானது. தர சோதனைகள் தேர்ச்சி பெற்றன."); toast.success("Water system status: All services operational"); }, response: 'Checking system status' },
     ];
 
     for (const cmd of [...navigationCommands, ...utilityCommands]) {
@@ -240,19 +251,23 @@ export function WaterHome() {
     }
 
     toast.error("Command not recognized. Say 'help' for water commands.");
-    speakResponse("Sorry, I didn't understand. Say 'help' for available water commands.");
+    speakResponse("மன்னிக்கவும், புரிந்துகொள்ளவில்லை. தண்ணீர் கட்டளைகளுக்கு 'உதவி' என்று சொல்லுங்கள்.");
   };
 
   const speakResponse = (text: string) => {
     if ('speechSynthesis' in window) {
       speechSynthesis.cancel();
       const utterance = new SpeechSynthesisUtterance(text);
-      utterance.lang = 'en-US';
+      // Detect if text contains Tamil characters
+      const hasTamil = /[\u0B80-\u0BFF]/.test(text);
+      utterance.lang = hasTamil ? 'ta-IN' : 'en-US';
       utterance.rate = 0.9;
       utterance.pitch = 1;
       const voices = speechSynthesis.getVoices();
       const preferredVoice = voices.find(voice => 
-        voice.name.includes('Female') || voice.lang.startsWith('en')
+        hasTamil ? 
+          (voice.lang.startsWith('ta') || voice.name.includes('Tamil')) :
+          (voice.name.includes('Female') || voice.lang.startsWith('en'))
       );
       if (preferredVoice) utterance.voice = preferredVoice;
       speechSynthesis.speak(utterance);
@@ -266,8 +281,8 @@ export function WaterHome() {
   };
 
   const showHelp = () => {
-    toast.info("Voice commands: pay tax, new connection, complaint, track, calculator, transparency, emergency leakage, help");
-    speakResponse("Available commands: pay tax, new connection, leak complaint, track status, calculator, help, or emergency leakage.");
+    toast.info("Voice commands: pay tax/பில் கட்டணம், new connection/புது இணைப்பு, complaint/புகார் செய்ய, track/நிலை சரிபார், calculator/கணக்கிடு, transparency/வெளிப்படைத்தன்மை, emergency leakage/கசிவு அவசரம், help/உதவி");
+    speakResponse("கிடைக்கும் கட்டளைகள்: பில் கட்டணம், புது இணைப்பு, புகார் செய்ய, நிலை சரிபார், கணக்கிடு, வெளிப்படைத்தன்மை, கசிவு அவசரம், அல்லது உதவி. தொடர்ந்து முறைக்கு 'தொடர்ந்து முறை' என்று சொல்லுங்கள்.");
   };
 
   return (
@@ -637,27 +652,27 @@ export function WaterHome() {
                 <ul className="text-sm space-y-2">
                   <li className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                    "Pay tax" or "Bill payment"
+                    "Pay tax" or "பில் கட்டணம்" (Bill payment)
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-green-500 rounded-full"></span>
-                    "New connection" or "Apply"
+                    "New connection" or "புது இணைப்பு" (Apply)
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-red-500 rounded-full"></span>
-                    "Complaint" or "Report issue"
+                    "Complaint" or "புகார் செய்ய" (Report issue)
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-purple-500 rounded-full"></span>
-                    "Track status" or "Check status"
+                    "Track status" or "நிலை சரிபார்" (Check status)
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-orange-500 rounded-full"></span>
-                    "Calculator" or "Usage calculator"
+                    "Calculator" or "கணக்கிடு" (Usage calculator)
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-indigo-500 rounded-full"></span>
-                    "Transparency" or "View records"
+                    "Transparency" or "வெளிப்படைத்தன்மை" (View records)
                   </li>
                 </ul>
               </div>
@@ -667,23 +682,23 @@ export function WaterHome() {
                 <ul className="text-sm space-y-2">
                   <li className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-gray-500 rounded-full"></span>
-                    "Help" or "Show commands"
+                    "Help" or "உதவி" (Show commands)
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-yellow-500 rounded-full"></span>
-                    "Continuous mode" (always listen)
+                    "Continuous mode" or "தொடர்ந்து முறை" (Always listen)
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-blue-500 rounded-full"></span>
-                    "Status" or "System status"
+                    "Status" or "நிலை" (System status)
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-red-600 rounded-full animate-pulse"></span>
-                    "Emergency" or "Leakage" (calls 108)
+                    "Emergency" or "கசிவு" (Leakage - calls 108)
                   </li>
                   <li className="flex items-center gap-2">
                     <span className="w-2 h-2 bg-red-600 rounded-full"></span>
-                    "Contamination" or "Bad water" (calls 1913)
+                    "Contamination" or "மாசு" (Bad water - calls 1913)
                   </li>
                 </ul>
               </div>

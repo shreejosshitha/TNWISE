@@ -6,8 +6,10 @@ import { useAuth } from "../../context/AuthContext";
 import { electricityApi } from "../../services/electricityApi";
 import { wsService } from "../../services/websocket";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export function ElectricityTracking() {
+  const { t } = useTranslation('electricity');
   const [applications, setApplications] = useState<any[]>([]);
   const [complaints, setComplaints] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);

@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { Header } from "../../components/Header";
+
 import { ArrowLeft, AlertCircle, Clock, CheckCircle2, MapPin, User, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { formatDistanceToNowStrict } from "date-fns";

@@ -3,6 +3,7 @@ import { AIChatbot } from "../../components/AIChatbot";
 import { Link, useNavigate } from "react-router-dom";
 import { ArrowLeft, ArrowRight, Upload, CheckCircle2 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { useAuth } from "../../context/AuthContext";
 import { electricityApi } from "../../services/electricityApi";
 
@@ -16,6 +17,7 @@ const STEPS = [
 ];
 
 export function NewConnection() {
+  const { t } = useTranslation('electricity');
   const [currentStep, setCurrentStep] = useState(0);
   const [formData, setFormData] = useState<any>({
     name: "",

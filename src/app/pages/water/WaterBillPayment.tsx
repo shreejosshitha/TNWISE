@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Header } from "../../components/Header";
+
 import { AIChatbot } from "../../components/AIChatbot";
 import { Link, useSearchParams } from "react-router-dom";
 import { ArrowLeft, Search, CreditCard, CheckCircle2, Loader2, Download } from "lucide-react";

@@ -19,13 +19,13 @@ export default defineConfig({
   server: {
     proxy: {
       '/api': {
-        target: `http://localhost:${process.env.VITE_BACKEND_PORT || '3003'}`,
+        target: 'http://localhost:4000',
         changeOrigin: true,
         secure: false,
         rewrite: (path) => path.replace(/^\/api/, '/api'),
       },
       '/socket.io': {
-        target: `http://localhost:${process.env.VITE_BACKEND_PORT || '3003'}`,
+        target: 'http://localhost:4000',
         ws: true,
         changeOrigin: true,
         secure: false,

@@ -5,8 +5,10 @@ import { useAuth } from "../../context/AuthContext";
 import { electricityApi } from "../../services/electricityApi";
 import { ArrowLeft, CheckCircle2, MapPin, Image, Navigation, Upload } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 
 export function ElectricityComplaint() {
+  const { t } = useTranslation('electricity');
   const [issueType, setIssueType] = useState("");
   const [description, setDescription] = useState("");
   const [consumerNumber, setConsumerNumber] = useState("");

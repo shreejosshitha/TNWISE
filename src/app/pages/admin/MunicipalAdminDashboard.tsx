@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo } from "react";
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router";
-import { Header } from "../../components/Header";
+
 import { 
   LogOut, 
   BarChart3, 
@@ -128,7 +128,7 @@ updateAdminComplaintStatus(complaintId, status as ComplaintStatus);      toast.s
 
   return (
 <div className="min-h-screen bg-gray-50">
-      <Header />
+
       
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}

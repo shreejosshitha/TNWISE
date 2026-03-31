@@ -122,6 +122,31 @@ function ProtectedMunicipalAdminDashboard() {
   );
 }
 
+
+function ProtectedMunicipalComplaint() {
+  return (
+    <ProtectedRoute>
+      <MunicipalComplaint />
+    </ProtectedRoute>
+  );
+}
+
+function ProtectedPropertyTax() {
+  return (
+    <ProtectedRoute>
+      <PropertyTax />
+    </ProtectedRoute>
+  );
+}
+
+function ProtectedMunicipalTracking() {
+  return (
+    <ProtectedRoute>
+      <MunicipalTracking />
+    </ProtectedRoute>
+  );
+}
+
 function ProtectedTransportAdminDashboard() {
   return (
     <AdminProtectedRoute department="transport">
@@ -137,6 +162,7 @@ function ProtectedAdminDashboard() {
     </AdminProtectedRoute>
   );
 }
+
 
 import { RootLayout } from './layout/RootLayout';
 // import { NotFound } from './pages/NotFound';
@@ -231,18 +257,21 @@ export const router = createBrowserRouter([
   },
 
 
-  {
+{
     path: "/municipal/complaint",
-    Component: MunicipalComplaint,
+    Component: ProtectedMunicipalComplaint,
   },
-  {
+
+{
     path: "/municipal/property-tax",
-    Component: PropertyTax,
+    Component: ProtectedPropertyTax,
   },
-  {
+
+{
     path: "/municipal/tracking",
-    Component: MunicipalTracking,
+    Component: ProtectedMunicipalTracking,
   },
+
   {
     path: "/notifications",
     Component: NotificationsPage,

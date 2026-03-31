@@ -1,3 +1,4 @@
+
 import { AIChatbot } from "../components/AIChatbot";
 import { Link } from "react-router-dom";
 import { useMemo } from "react";
@@ -17,11 +18,21 @@ import {
   Shield,
   User,
   MapPin,
-
+  LogOut,
 } from "lucide-react";
+import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
+import { Button } from "../components/ui/button";
 
 export function UserDashboard() {
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    toast.success("Logged out successfully");
+    navigate("/login");
+  };
 
   const profile = user?.citizenProfile;
   const address = profile
@@ -39,9 +50,16 @@ export function UserDashboard() {
   }, [profile?.services]);
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-slate-50 to-blue-50">
+<div className="min-h-screen bg-gradient-to-b from-slate-50 to-blue-50">
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+
+        <div className="flex justify-end p-4">
+          <Button variant="outline" onClick={handleLogout} className="flex items-center gap-2">
+            <LogOut className="w-4 h-4" />
+            Logout
+          </Button>
+        </div>
 
         {/* Header Banner */}
         <div className="bg-white border-2 border-blue-200 shadow-lg rounded-xl p-8 mb-12">

@@ -1,6 +1,6 @@
 import { useAuth } from "../../context/AuthContext";
 import { useNavigate } from "react-router";
-import { Header } from "../../components/Header";
+
 import { LogOut, BarChart3, AlertCircle, FileText, Settings } from "lucide-react";
 import { toast } from "sonner";
 
@@ -30,7 +30,7 @@ export function TransportAdminDashboard() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header />
+
       
       <div className="max-w-7xl mx-auto px-4 py-8">
         {/* Welcome Section */}

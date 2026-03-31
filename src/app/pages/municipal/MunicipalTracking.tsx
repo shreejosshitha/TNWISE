@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { AIChatbot } from "../../components/AIChatbot";
+
 import { Link } from "react-router-dom";
 import { ArrowLeft, AlertCircle, Clock, CheckCircle2, Copy } from "lucide-react";
 import { toast } from "sonner";
@@ -80,7 +81,7 @@ export function MunicipalTracking() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-        <Header showAuth={true} />
+
         <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="bg-white rounded-2xl shadow-xl p-8 text-center">
             <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
@@ -94,7 +95,6 @@ export function MunicipalTracking() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-green-50">
-      <Header showAuth={true} />
       <div className="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link to="/municipal" className="inline-flex items-center gap-2 text-blue-600 hover:text-blue-700 mb-6">
           <ArrowLeft className="w-5 h-5" />

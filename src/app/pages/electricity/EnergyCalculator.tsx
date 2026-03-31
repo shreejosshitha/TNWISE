@@ -8,6 +8,7 @@ import {
   AlertTriangle, CheckCircle, Sparkles, Brain, Cpu, Wind, Droplets, Plus, Download
 } from "lucide-react";
 import { toast } from "sonner";
+import { useTranslation } from "react-i18next";
 import { Card, CardContent, CardHeader, CardTitle } from "../../components/ui/card";
 import { Badge } from "../../components/ui/badge";
 import { Button } from "../../components/ui/button";
@@ -39,6 +40,7 @@ interface EnergyRecommendation {
 }
 
 export function EnergyCalculator() {
+  const { t } = useTranslation('electricity');
   const [appliances, setAppliances] = useState<Appliance[]>([
     { id: '1', name: 'LED Bulb', icon: Lightbulb, wattage: 10, category: 'Lighting', usageHours: 8, quantity: 10, efficiency: 'high' },
     { id: '2', name: 'Refrigerator', icon: Refrigerator, wattage: 150, category: 'Kitchen', usageHours: 24, quantity: 1, efficiency: 'medium' },
